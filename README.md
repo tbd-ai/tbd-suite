@@ -1,4 +1,4 @@
-# DNN-Training-Suite
+# TBD (Training Benchmark for DNNs) Training Suite
 
 ## Introduction
 
