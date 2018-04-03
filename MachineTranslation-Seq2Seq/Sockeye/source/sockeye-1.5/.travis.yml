@@ -1,0 +1,27 @@
+sudo: required
+language: python
+
+services:
+  - docker
+
+before_install:
+  - docker pull ubuntu:16.04
+
+python:
+  - "3.4"
+  - "3.5"
+  - "3.6"
+
+install:
+  - pip install -r requirements.txt
+  - pip install -r requirements.dev.txt
+  - pip install -r requirements.docs.txt
+
+script:
+  - python3 setup.py test
+  - pylint --version
+  - pylint --rcfile=pylintrc sockeye -E
+  - pylint --rcfile=pylintrc test -E
+  - mypy --ignore-missing-imports --follow-imports=silent @typechecked-files
+  - check-manifest --ignore sockeye/git_version.py
+#  - python -m pytest test/system

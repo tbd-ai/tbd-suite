@@ -1,0 +1,5 @@
+LibriSpeech/
+corpus.json
+checkpoints
+log
+unicodemap_en_baidu_bi_graphemes.csv

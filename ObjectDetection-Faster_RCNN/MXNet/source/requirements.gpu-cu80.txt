@@ -1,0 +1,7 @@
+mxnet-cu80==0.11.0
+cython
+scikit-image
+easydict
+matplotlib
+opencv-python
+future

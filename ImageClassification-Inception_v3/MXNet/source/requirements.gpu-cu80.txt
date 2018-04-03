@@ -1,0 +1,4 @@
+mxnet-cu80==0.11.0
+numpy
+numba
+opencv-python

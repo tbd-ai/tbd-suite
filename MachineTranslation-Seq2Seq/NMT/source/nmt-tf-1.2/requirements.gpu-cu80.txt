@@ -1,0 +1,4 @@
+numba
+tensorflow-gpu==1.3.0
+tensorboard==1.0.0a6
+tensorflow.tensorboard
