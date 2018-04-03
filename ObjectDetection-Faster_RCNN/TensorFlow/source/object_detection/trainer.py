@@ -32,6 +32,7 @@ from object_detection.utils import ops as util_ops
 from object_detection.utils import variables_helper
 from deployment import model_deploy
 from tensorflow.python.framework import constant_op
+from profile_step import train_step
 
 slim = tf.contrib.slim
 
