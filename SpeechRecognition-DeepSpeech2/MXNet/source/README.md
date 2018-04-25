@@ -31,8 +31,9 @@ With rich functionalities and convenience explained above, you can build your ow
 
 ## Install baidu warpctc
 ```
-  git clone https://github.com/baidu-research/warp-ctc source
-  cd source/warp-ctc
+  cd source
+  git clone https://github.com/baidu-research/warp-ctc
+  cd warp-ctc
   mkdir build
   cd build
   cmake ..
