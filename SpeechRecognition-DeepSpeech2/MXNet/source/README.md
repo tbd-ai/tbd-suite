@@ -31,7 +31,6 @@ With rich functionalities and convenience explained above, you can build your ow
 
 ## Install baidu warpctc
 Follow this [link](https://github.com/baidu-research/warp-ctc#compilation) for instructions.
-You might need to install Torch as well before building warp-ctc [link](http://torch.ch/docs/getting-started.html).
 ```
   cd source/warp-ctc
   mkdir build
