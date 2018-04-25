@@ -12,7 +12,7 @@ _DeepSpeech2_ is the benchmark on Speech Recognition
 ```bash
   sudo apt-get install sox
 ```
-* For setting up DS2 on MXNet, Warp-CTC need to be installed first. Please follow the steps given [here](https://github.com/UofT-EcoSystem/DNN-Training-Suite/tree/master/SpeechRecognition-DeepSpeech2/MXNet/source#install-baidu-warpctc).
+* For setting up DS2 on MXNet, Warp-CTC need to be installed first. Please follow the steps given [here](https://github.com/tbd-ai/tbd-suite/tree/master/SpeechRecognition-DeepSpeech2/MXNet/source#install-baidu-warpctc).
 
 ## Reference
 
