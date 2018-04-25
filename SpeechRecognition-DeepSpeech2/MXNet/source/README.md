@@ -30,8 +30,8 @@ With rich functionalities and convenience explained above, you can build your ow
 </pre>
 
 ## Install baidu warpctc
-Follow this [link](https://github.com/baidu-research/warp-ctc#compilation) for instructions.
 ```
+  git clone https://github.com/baidu-research/warp-ctc source
   cd source/warp-ctc
   mkdir build
   cd build
