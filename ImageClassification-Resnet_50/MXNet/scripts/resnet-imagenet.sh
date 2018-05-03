@@ -16,7 +16,7 @@ elif [ "$1" = "--profile-fp32" ]
 then
 	mkdir -p measurements
 	PREFIX="/usr/local/cuda/bin/nvprof --profile-from-start off \
-		--export-profile measurements/resnet50-mxnet.nvvp -f \
+		--export-profile measurements/resnet50-mxnet-fp32.nvvp -f \
 		--metrics single_precision_fu_utilization"
 	SUFFIX=" --nvprof-on True"
 
