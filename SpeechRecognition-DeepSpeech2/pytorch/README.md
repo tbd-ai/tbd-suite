@@ -21,12 +21,14 @@ The trained models are the vanilla models (good for forming a standardized bench
 Suggested environment : Ubuntu 16.04, 8 CPUs, one P100, 300GB disk
 
 Assume sufficiently recent NVIDIA driver is installed. Check with
-	nvidia-smi
+
+    nvidia-smi
 
 Here is a suggestion for how to get a driver (but you should really _check out which driver version is required for your hardware_).
-	sudo add-apt-repository ppa:graphics-drivers/ppa
-	sudo apt-get update
-	sudo apt-get install cuda-drivers
+
+    sudo add-apt-repository ppa:graphics-drivers/ppa
+    sudo apt-get update
+    sudo apt-get install cuda-drivers
 
 You may need Cuda 9.0:
 
@@ -48,16 +50,21 @@ You may need to install docker before using our script:
     sudo apt install docker-ce -y
 
 Use our script to install nvidia-docker (Note, echo $USER to see that your username is set as a environment variable):
+
 	sh script/docker/install_cuda_docker.sh
 Crucially, add your username to the docker usergroup to avoid having to sudo run the container (causes problems later).
+
 	sudo usermod -a -G docker $USER
 	newgrp docker
 
 Use our script to build your docker image:
+
 	sh script/docker/build-docker.sh
 There are 14 sections in this script. This script is installing pytorch, torchaudio, pip, and various other dependencies to the image. To check for completion:
+
 	docker images
 You should see
+
 	ds2-cuda9cudnn
 	
 ### Step 3: Download and verify data
@@ -65,16 +72,20 @@ The `download_dataset` script will use the python data utils defined in the `dat
 The `verify_dataset` script will build a single tarball of the dataset, checksum it, compare against a reference checksum, and report whether they match.  This takes up to an hour.
 The dataset itself is over 100GB, and intermediate files during download, processing, and verification require 220GB of free disk space to complete.
 Here is a template idea that uses a extra disk to hold the dataset:
+
 	sudo mkdir /scratch
 	sudo mount /dev/sdb1 /scratch
 	sudo chown -R $USER:docker /scratch
+	
 Clone our repo onto /scratch and proceed to downloading the dataset in that directory. Then use the link:
+
 	ln -s /scratch/you/directory/libri_train_manifest.csv /home/$USER/your/directory/
 
 We suggest using tmux to encapsulate the actual download which will take a while.
+
 	tmux new -s tbd_ds2
 	tmux attach -t tbd_ds2
-    sh script/download_dataset.sh all
+    	sh script/download_dataset.sh all
 	
 We provide several options in the download script: all, clean, clean_small, other. These refer to the actual samples that the training and inference will consider.
 
@@ -82,18 +93,26 @@ Note that the example verification script works only with "all" because only it'
 You should also run verification inside the docker container (see next step).
 
 Publication/Attribution:
+
 	["OpenSLR LibriSpeech Corpus"](http://www.openslr.org/12/) provides over 1000 hours of speech data in the form of raw audio.
+	
 Data preprocessing:
+
 	The audio files are sampled at 16kHz.
 	All inputs are also pre-processed into a spectrogram of the first 13 mel-frequency cepstral coefficients (MFCCs).
+	
 Training and test data separation:
-	fter running the `download_dataset` script, the `LibriSpeech_dataset` directory will have subdirectories for training set, validation set, and test set.
+
+	After running the `download_dataset` script, the `LibriSpeech_dataset` directory will have subdirectories for training set, validation set, and test set.
 	Each contains both clean and noisy speech samples.
+	
 Data order:
+
 	Audio samples are sorted by length.
 
 ### Step 4: Run docker container
 Now we can spin the docker image up into an actual container. We suggest using tmux as well.
+
 	tmux new -s tbd_ds2
 	tmux attach -t tbd_ds2
 	sh script/docker/run-dev.sh
@@ -117,10 +136,11 @@ The model will run until the specified target accuracy is achieved or 10 full ep
 
 ### Step 5-6: Training and testing
 Simply run from inside the docker container:
+
 	sh script/train.sh new | tee my_training_log.out
 	sh script/test.sh 20 libri -1 1 -1 | tee my_inference_result.out
-
-# 5. Model
+	
+# 4. Model
 ### Publication/Attribution
 This is an implementation of [DeepSpeech2](https://arxiv.org/pdf/1512.02595.pdf) adapted from [deepspeech.pytorch](https://github.com/SeanNaren/deepspeech.pytorch).
 ### List of layers
@@ -188,3 +208,7 @@ Details:
   )
 
 )
+
+# 5. Quality
+Best WER 21.2 on Librispeech Test Clean.
+See results/training/training\ 1 for more details.
