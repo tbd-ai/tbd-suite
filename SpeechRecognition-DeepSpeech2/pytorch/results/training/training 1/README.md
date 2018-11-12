@@ -12,6 +12,7 @@ Batch size, learning rate, annealing rate were varied and experimented upon.
 In "training 2" we fix the parameters.
 
 WER
+
 Epoch		Test		Validation			Hyperparameter Notes
 Start		--			82.4				MLPerf Default
 3			--			41.9				MLPerf Default
