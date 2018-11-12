@@ -137,7 +137,7 @@ if __name__ == "__main__":
         ax.errorbar(idx,data[idx]['mean'],yerr=data[idx]['stddev'])
     plt.title('Sactter plot of inference trials and variances of Librispeech Test Clean inputs')
     plt.xlabel('Idx of input')
-    plt.ylabel('Latency of inference trials')
+    plt.ylabel('Latency of inference trials [sec]')
     print('Showing plot (takes a while and blocks)')
 #     plt.show()
     print('Saving Figures')
