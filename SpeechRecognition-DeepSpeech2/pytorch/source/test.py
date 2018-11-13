@@ -93,7 +93,8 @@ def main():
     print("Use cuda: {}".format(params.cuda))
 
     torch.manual_seed(args.seed)
-    torch.cuda.manual_seed_all(args.seed)
+    if params.cuda:
+      torch.cuda.manual_seed_all(args.seed)
 
     if params.rnn_type == 'gru' and params.rnn_act_type != 'tanh':
       print("ERROR: GRU does not currently support activations other than tanh")
@@ -132,7 +133,7 @@ def main():
                       noise_levels=(params.noise_min, params.noise_max))
 
     if args.use_set == 'libri':
-        testing_manifest = params.val_manifest + ("_held" if args.hold_idx >=0 else "")
+        testing_manifest = params.val_manifest + ("_held{}".format(args.hold_idx) if args.hold_idx >=0 else "")
     else:
         testing_manifest = params.test_manifest
 
@@ -169,7 +170,12 @@ def main():
 
     if args.continue_from:
         print("Loading checkpoint model %s" % args.continue_from)
-        package = torch.load(args.continue_from)
+
+        if params.cuda:
+            package = torch.load(args.continue_from)
+        else:
+            package = torch.load(args.continue_from, map_location=lambda storage, loc: storage)
+
         model.load_state_dict(package['state_dict'])
         optimizer.load_state_dict(package['optim_dict'])
         start_epoch = int(package.get('epoch', 1)) - 1  # Python index start at 0 for training

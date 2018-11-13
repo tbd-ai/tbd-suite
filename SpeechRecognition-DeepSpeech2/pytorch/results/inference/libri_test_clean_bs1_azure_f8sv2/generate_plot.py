@@ -12,7 +12,7 @@ from astropy.units import ymin
 parser = argparse.ArgumentParser(description='DeepSpeech inference graph plotter')
 parser.add_argument('--manifest_stats', default="libri_test_manifest.csv_stats", help='CSV containing audio file name and its duration')
 parser.add_argument('--manifest', default="libri_test_manifest.csv_scram_rep", help='CSV containing the results of the inferenc runs')
-parser.add_argument('--results', default="cpu_flash_storage_scram_rep.csv", help='CSV containing the results of the inferenc runs')
+parser.add_argument('--results', default="results.csv", help='CSV containing the results of the inferenc runs')
 
 def make_file(filename,data=None):
     f = open(filename,"w+")
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     print('Plot error bars')
     for idx in data:
         ax.errorbar(idx,data[idx]['mean'],yerr=data[idx]['stddev'])
-    plt.title('LOCAL: Scatter plot of inference trials and variances of Librispeech Test Clean inputs')
+    plt.title('Azure F8s_v2: Scatter plot of inference trials and variances of Librispeech Test Clean inputs')
     plt.xlabel('Idx of input')
     plt.ylabel('Latency of inference trials [sec]')
     print('Showing plot (takes a while and blocks)')
@@ -150,7 +150,7 @@ if __name__ == "__main__":
     print('Plot realtime speedup')
     for idx in data:
         ax15.plot(idx, data[idx]['dur']/data[idx]['mean'], marker='o', c='g')
-    plt.title('LOCAL: Normalized mean performance plot Librispeech Test Clean inputs')
+    plt.title('Azure F8s_v2: Normalized mean performance plot Librispeech Test Clean inputs')
     plt.xlabel('Idx of input')
     plt.ylabel('Real-time speed up = Input duration / mean Latency of inference trials [sec/sec]')
     print('Showing plot')
@@ -162,7 +162,7 @@ if __name__ == "__main__":
     print('Plot realtime speedup')
     for idx in data:
         ax16.plot(data[idx]['dur'], data[idx]['dur']/data[idx]['mean'], marker='o', c='g')
-    plt.title('LOCAL: Normalized mean performance plot Librispeech Test Clean inputs')
+    plt.title('Azure F8s_v2: Normalized mean performance plot Librispeech Test Clean inputs')
     plt.xlabel('Input duration')
     plt.ylabel('Real-time speed up = Input duration / mean Latency of inference trials [sec/sec]')
     print('Showing plot')
@@ -180,7 +180,7 @@ if __name__ == "__main__":
     ax2.plot(bin_edges[1:],cdf)
     plt.xlabel('Latency bound [sec]')
     plt.ylabel('% of samples')
-    plt.title('LOCAL: % of batch size 1 inputs from Librispeech Test Clean satisfying a latency bound')
+    plt.title('Azure F8s_v2: % of batch size 1 inputs from Librispeech Test Clean satisfying a latency bound')
     plt.xticks(bin_edges,rotation=90)
     plt.yticks(cdf[::10], np.round(cdf/cdf[-1],2)[::10])
     plt.axhline(y=0.99*cdf[-1],xmin=0,xmax=bin_edges[-1],c='k')
