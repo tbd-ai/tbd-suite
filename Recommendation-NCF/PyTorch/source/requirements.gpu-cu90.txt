@@ -1,0 +1,4 @@
+tqdm==4.20.0
+scipy
+pandas
+numba
