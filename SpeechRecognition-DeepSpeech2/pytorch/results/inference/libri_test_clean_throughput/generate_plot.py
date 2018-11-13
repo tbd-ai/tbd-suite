@@ -64,8 +64,8 @@ if __name__ == "__main__":
         assert (start > 0 and start < results_len-1), "data tag for results_file not found in valid position"
         return meta, runtime_res[start:]  # meta and data
     
-    folders = ['2s','5s','5s_rerun']
-    colors = ['k','b','g','r']
+    folders = ['2s']
+    colors = ['r','b','g','r']
     batch_sizes = [1,2,3,4,5,6,7,8,9,10,11,12]
     
     DUR = 0; BS = 4; P50 = 7; P99 = 8;
@@ -76,17 +76,25 @@ if __name__ == "__main__":
     fig1 = plt.figure(1)
     ax = plt.subplot(1, 1, 1)
     for folder, color in zip(folders,colors):
+        x = []
+        y = []
         for batch_size in batch_sizes:
             res_path = osp.join(pwd,folder,"{}.csv".format(batch_size))
             meta, _ = preproc_results(load_results(res_path))
+            # The result csv comes pre normalized by the duration. 
             ax.plot(float(meta[P99][1])*batch_size,batch_size*float(meta[DUR][1]),marker="o",c=color)
+            x.append(float(meta[P99][1])*batch_size)
+            y.append(batch_size*float(meta[DUR][1]))
             sys.stdout.write("\r[{}/{}]         ".format(folder, batch_size))
             sys.stdout.flush()
+        z = np.polyfit(x, y, 1)
+        p = np.poly1d(z)
+        ax.plot(x,p(x),"k--")
 
-    plt.title('Throughput vs Latency of Librispeech Test Clean inputs')
+    plt.title('Throughput vs Latency of Librispeech Test Clean inputs (truncated @ 2sec)')
     plt.xlabel('99%-tile latency for one batch [sec]')
     plt.ylabel('Throughput, total audio duration of batch [sec]')
-    plt.legend(folders,loc='best')
+#     plt.legend(folders,loc='best')
     print('Showing plot')
     plt.show()
 #     print('Saving Figures')
