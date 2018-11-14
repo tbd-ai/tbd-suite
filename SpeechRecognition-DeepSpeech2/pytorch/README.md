@@ -32,7 +32,7 @@ Here is a suggestion for how to get a driver (but you should really _check out w
 
 You may need Cuda 9.0:
 
-    wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.0.176-1_amd64.de
+    wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.0.176-1_amd64.deb
     sudo dpkg -i cuda-repo-ubuntu1604_9.0.176-1_amd64.deb
     sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
     sudo apt-get update
