@@ -7,7 +7,6 @@ import numpy as np
 ### Import torch ###
 import torch
 from torch.autograd import Variable
-from warpctc_pytorch import CTCLoss
 import torch.nn.functional as F
 
 ### Import Data Utils ###
@@ -21,12 +20,11 @@ def eval_model(model, test_loader, decoder):
 	"""
 	Model evaluation -- used during training.
 	"""
-	start_iter = 0
 	total_cer, total_wer = 0, 0
 	word_count, char_count = 0, 0
 	model.eval()
 	# For each batch in the test_loader, make a prediction and calculate the WER CER
-	for i, (data) in enumerate(test_loader):
+	for data in test_loader:
 		inputs, targets, input_percentages, target_sizes = data
 		inputs = Variable(inputs, volatile=True)
 
@@ -91,16 +89,18 @@ def eval_model_verbose(model, test_loader, decoder, cuda, n_trials=-1):
 	"""
 	Model evaluation -- used during inference.
 	"""
-	start_iter = 0
 	total_cer, total_wer = 0, 0
 	word_count, char_count = 0, 0
 	model.eval()
 	batch_time = AverageMeter()
+
 	# We allow the user to specify how many batches (trials) to run
-	trials_ran = min(n_trials if n_trials!=-1 else len(test_loader), len(test_loader))
-	# For each batch in the test_loader, make a prediction and calculate the WER CER
-	for i, (data) in enumerate(test_loader):
-		if i < n_trials or n_trials == -1:
+	trials_ran = min(n_trials if n_trials != -1 else len(test_loader), len(test_loader))
+
+	for i, data in enumerate(test_loader):
+		if i >= n_trials and n_trials != -1:
+			break
+		else:
 			end = time.time()
 			inputs, targets, input_percentages, target_sizes = data
 			inputs = Variable(inputs, volatile=False)
@@ -141,8 +141,6 @@ def eval_model_verbose(model, test_loader, decoder, cuda, n_trials=-1):
 			if cuda:
 				torch.cuda.synchronize()
 			del out
-		else:
-			break
 			
 	# WER, CER
 	wer = total_wer  / float(word_count)

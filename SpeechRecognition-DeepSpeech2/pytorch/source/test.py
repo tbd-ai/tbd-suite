@@ -46,7 +46,7 @@ def make_file(filename,data=None):
     f = open(filename,"w+")
     f.close()
     if data:
-        write_line(filename,data)
+        write_line(filename, data)
 
 def write_line(filename,msg):
     f = open(filename,"a")
@@ -76,7 +76,7 @@ def main(args):
 
     save_folder = args.save_folder
 
-    loss_results, cer_results, wer_results = torch.Tensor(params.epochs), torch.Tensor(params.epochs), torch.Tensor(params.epochs)
+    cer_results, wer_results = torch.Tensor(params.epochs), torch.Tensor(params.epochs)
     best_wer = None
     try:
         os.makedirs(save_folder)
@@ -145,54 +145,38 @@ def main(args):
     print(model)
     print("Number of parameters: %d" % DeepSpeech.get_param_size(model))
 
-    for epoch in range(start_epoch, params.epochs):
+    model.eval()
+    wer, cer, trials = eval_model_verbose(model, test_loader, decoder, params.cuda, args.n_trials)
+    root = os.getcwd()
+    outfile = osp.join(root, "inference_bs{}_i{}_gpu{}.csv".format(params.batch_size_val, args.hold_idx, params.cuda))
+    print("Exporting inference to: {}".format(outfile))
+    make_file(outfile)
+    write_line(outfile, "batch times pre normalized by hold_sec =,{}\n".format(args.hold_sec))
+    write_line(outfile, "wer, {}\n".format(wer))
+    write_line(outfile, "cer, {}\n".format(cer))
+    write_line(outfile, "bs, {}\n".format(params.batch_size_val))
+    write_line(outfile, "hold_idx, {}\n".format(args.hold_idx))
+    write_line(outfile, "cuda, {}\n".format(params.cuda))
+    write_line(outfile, "avg batch time, {}\n".format(trials.avg/args.hold_sec))
+    percentile_50 = np.percentile(trials.array,50)/params.batch_size_val/args.hold_sec
+    write_line(outfile, "50%-tile latency, {}\n".format(percentile_50))
+    percentile_99 = np.percentile(trials.array,99)/params.batch_size_val/args.hold_sec
+    write_line(outfile, "99%-tile latency, {}\n".format(percentile_99))
+    write_line(outfile, "through put, {}\n".format(1/percentile_50))
+    write_line(outfile, "data\n")
+    for trial in trials.array:
+        write_line(outfile, "{}\n".format(trial/args.hold_sec))
 
-        #################################################################################################################
-        #                    The test script only really cares about this section.
-        #################################################################################################################
-        model.eval()
-
-        wer, cer, trials = eval_model_verbose( model, test_loader, decoder, params.cuda, args.n_trials)
-        root = os.getcwd()
-        outfile = osp.join(root, "inference_bs{}_i{}_gpu{}.csv".format(params.batch_size_val, args.hold_idx, params.cuda))
-        print("Exporting inference to: {}".format(outfile))
-        make_file(outfile)
-        write_line(outfile, "batch times pre normalized by hold_sec =,{}\n".format(args.hold_sec))
-        write_line(outfile, "wer, {}\n".format(wer))
-        write_line(outfile, "cer, {}\n".format(cer))
-        write_line(outfile, "bs, {}\n".format(params.batch_size_val))
-        write_line(outfile, "hold_idx, {}\n".format(args.hold_idx))
-        write_line(outfile, "cuda, {}\n".format(params.cuda))
-        write_line(outfile, "avg batch time, {}\n".format(trials.avg/args.hold_sec))
-        percentile_50 = np.percentile(trials.array,50)/params.batch_size_val/args.hold_sec
-        write_line(outfile, "50%-tile latency, {}\n".format(percentile_50))
-        percentile_99 = np.percentile(trials.array,99)/params.batch_size_val/args.hold_sec
-        write_line(outfile, "99%-tile latency, {}\n".format(percentile_99))
-        write_line(outfile, "through put, {}\n".format(1/percentile_50))
-        write_line(outfile, "data\n")
-        for trial in trials.array:
-            write_line(outfile, "{}\n".format(trial/args.hold_sec))
-
-        loss_results[epoch] = avg_loss
-        wer_results[epoch] = wer
-        cer_results[epoch] = cer
-        print('Validation Summary Epoch: [{0}]\t'
-              'Average WER {wer:.3f}\t'
-              'Average CER {cer:.3f}\t'.format(
-            epoch + 1, wer=wer, cer=cer))
-
-        # anneal lr
-        optim_state = optimizer.state_dict()
-        optim_state['param_groups'][0]['lr'] = optim_state['param_groups'][0]['lr'] / params.learning_anneal
-        optimizer.load_state_dict(optim_state)
-        print('Learning rate annealed to: {lr:.6f}'.format(lr=optim_state['param_groups'][0]['lr']))
-
-        break
+    # anneal lr
+    optim_state = optimizer.state_dict()
+    optim_state['param_groups'][0]['lr'] = optim_state['param_groups'][0]['lr'] / params.learning_anneal
+    optimizer.load_state_dict(optim_state)
+    print('Learning rate annealed to: {lr:.6f}'.format(lr=optim_state['param_groups'][0]['lr']))
 
     print("=======================================================")
-    print("***Best WER = ", best_wer)
+    print("*** Best WER = {} ***".format(best_wer))
     for arg in vars(args):
-      print("***%s = %s " %  (arg.ljust(25), getattr(args, arg)))
+      print("*** %s = %s ***" % (arg.ljust(25), getattr(args, arg)))
     print("=======================================================")
 
 if __name__ == '__main__':
