@@ -4,14 +4,10 @@ import json
 import os
 import os.path as osp
 import time
-
 import sys
-
 import numpy as np
-
 import torch
 from torch.autograd import Variable
-from warpctc_pytorch import CTCLoss
 
 ### Import Data Utils ###
 sys.path.append('../')
@@ -24,35 +20,6 @@ from model import DeepSpeech, supported_rnns
 import params
 
 from eval_model import  eval_model_verbose
-
-###########################################################
-# Comand line arguments, handled by params except seed    #
-###########################################################
-parser = argparse.ArgumentParser(description='DeepSpeech training')
-parser.add_argument('--checkpoint', dest='checkpoint', action='store_true', help='Enables checkpoint saving of model')
-parser.add_argument('--save_folder', default='models/', help='Location to save epoch models')
-parser.add_argument('--model_path', default='models/deepspeech_final.pth.tar',
-                    help='Location to save best validation model')
-parser.add_argument('--continue_from', default='', help='Continue from checkpoint model')
-
-parser.add_argument('--seed', default=0xdeadbeef, type=int, help='Random Seed')
-
-parser.add_argument('--acc', default=23.0, type=float, help='Target WER')
-
-parser.add_argument('--start_epoch', default=-1, type=int, help='Number of epochs at which to start from')
-
-parser.add_argument('--use_set', default="libri", help='ov = OpenVoice test set, libri = Librispeech val set')
-
-parser.add_argument('--cpu', default=0, type=int)
-
-parser.add_argument('--hold_idx', default=-1, type=int, help='input idx to hold the test dataset at')
-
-parser.add_argument('--hold_sec', default=1, type=float)
-
-parser.add_argument('--batch_size_val', default=-1, type=int)
-
-parser.add_argument('--n_trials', default=-1, type=int, help='limit the number of trial ran, useful when holding idx')
-
 
 def to_np(x):
     return x.data.cpu().numpy()
@@ -86,9 +53,7 @@ def write_line(filename,msg):
     f.write(msg)
     f.close()
 
-def main():
-    args = parser.parse_args()
-
+def main(args):
     params.cuda = not bool(args.cpu)
     print("Use cuda: {}".format(params.cuda))
 
@@ -119,8 +84,7 @@ def main():
         if e.errno == errno.EEXIST:
             print('Directory already exists.')
         else:
-            raise
-    criterion = CTCLoss()
+            raise Exception('Unable to make directory!')
 
     with open(params.labels_path) as label_file:
         labels = str(''.join(json.load(label_file)))
@@ -141,12 +105,8 @@ def main():
         params.batch_size_val = args.batch_size_val
 
     print("Testing on: {}".format(testing_manifest))
-    train_dataset = SpectrogramDataset(audio_conf=audio_conf, manifest_filepath=params.val_manifest, labels=labels,
-                                       normalize=True, augment=params.augment)
     test_dataset = SpectrogramDataset(audio_conf=audio_conf, manifest_filepath=testing_manifest, labels=labels,
                                       normalize=True, augment=False)
-    train_loader = AudioDataLoader(train_dataset, batch_size=params.batch_size,
-                                   num_workers=1)
     test_loader = AudioDataLoader(test_dataset, batch_size=params.batch_size_val,
                                   num_workers=1)
 
@@ -177,40 +137,13 @@ def main():
             package = torch.load(args.continue_from, map_location=lambda storage, loc: storage)
 
         model.load_state_dict(package['state_dict'])
-        optimizer.load_state_dict(package['optim_dict'])
-        start_epoch = int(package.get('epoch', 1)) - 1  # Python index start at 0 for training
-        start_iter = package.get('iteration', None)
-        if start_iter is None:
-            start_epoch += 1  # Assume that we saved a model after an epoch finished, so start at the next epoch.
-            start_iter = 0
-        else:
-            start_iter += 1
-        avg_loss = int(package.get('avg_loss', 0))
 
-        if args.start_epoch != -1:
-          start_epoch = args.start_epoch
-
-        avg_loss = 0
-        start_epoch = 0
-        start_iter = 0
-        avg_training_loss = 0
-        epoch = 1
-    else:
-        avg_loss = 0
-        start_epoch = 0
-        start_iter = 0
-        avg_training_loss = 0
     if params.cuda:
         model         = torch.nn.DataParallel(model).cuda()
         # model         = torch.nn.parallel.DistributedDataParallel(model).cuda()
 
     print(model)
     print("Number of parameters: %d" % DeepSpeech.get_param_size(model))
-
-    batch_time = AverageMeter()
-    data_time = AverageMeter()
-    losses = AverageMeter()
-    ctc_time = AverageMeter()
 
     for epoch in range(start_epoch, params.epochs):
 
@@ -263,4 +196,34 @@ def main():
     print("=======================================================")
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='DeepSpeech training')
+
+    parser.add_argument('--checkpoint', dest='checkpoint', action='store_true', 
+                        help='Enables checkpoint saving of model')
+    parser.add_argument('--save_folder', default='models/', 
+                        help='Location to save epoch models')
+    parser.add_argument('--model_path', default='models/deepspeech_final.pth.tar',
+                        help='Location to save best validation model')
+    parser.add_argument('--continue_from', required=True, 
+                        help='Continue from checkpoint model')
+    parser.add_argument('--seed', default=0xdeadbeef, 
+                        type=int, help='Random Seed')
+    parser.add_argument('--acc', default=23.0, 
+                        type=float, help='Target WER')
+    parser.add_argument('--start_epoch', default=-1, 
+                        type=int, help='Number of epochs at which to start from')
+    parser.add_argument('--use_set', default="libri", 
+                        help='ov = OpenVoice test set, libri = Librispeech val set')
+    parser.add_argument('--cpu', default=False, 
+                        action='store_true', help='use cpu to do inference or not')
+    parser.add_argument('--hold_idx', default=-1, 
+                        type=int, help='input idx to hold the test dataset at')
+    parser.add_argument('--hold_sec', default=1, 
+                        type=float, help='speech clip time length')
+    parser.add_argument('--batch_size_val', default=-1, 
+                        type=int, help='batch size used for validaton')
+    parser.add_argument('--n_trials', default=-1, 
+                        type=int, help='limit the number of trial ran, useful when holding idx')
+    args = parser.parse_args()
+
+    main(args)
