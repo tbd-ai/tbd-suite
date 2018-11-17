@@ -10,8 +10,8 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 
 ### Import Data Utils ###
-from data.bucketing_sampler import BucketingSampler, SpectrogramDatasetWithLength
-from data.data_loader import AudioDataLoader, SpectrogramDataset
+from dataset.bucketing_sampler import BucketingSampler, SpectrogramDatasetWithLength
+from dataset.data_loader import AudioDataLoader, SpectrogramDataset
 from decoder import GreedyDecoder
 from model import DeepSpeech, supported_rnns
 from params import cuda

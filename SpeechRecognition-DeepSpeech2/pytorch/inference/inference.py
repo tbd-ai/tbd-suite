@@ -12,14 +12,14 @@ from torch.autograd import Variable
 ### Import Data Utils ###
 sys.path.append('../')
 
-from data.bucketing_sampler import BucketingSampler, SpectrogramDatasetWithLength
-from data.data_loader import AudioDataLoader, SpectrogramDataset
-from decoder import GreedyDecoder
-from model import DeepSpeech, supported_rnns
+from dataset.bucketing_sampler import BucketingSampler, SpectrogramDatasetWithLength
+from dataset.data_loader import AudioDataLoader, SpectrogramDataset
+from model.decoder import GreedyDecoder
+from model.model import DeepSpeech, supported_rnns
 
-import params
+import model.params as params
 
-from eval_model import  eval_model_verbose
+from model.eval_model import  eval_model_verbose
 
 def to_np(x):
     return x.data.cpu().numpy()
@@ -74,15 +74,7 @@ def main(args):
       print("***%s = %s " %  (arg.ljust(25), getattr(args, arg)))
     print("=======================================================")
 
-    save_folder = args.save_folder
     best_wer = None
-    try:
-        os.makedirs(save_folder)
-    except OSError as e:
-        if e.errno == errno.EEXIST:
-            print('Directory already exists.')
-        else:
-            raise Exception('Unable to make directory!')
 
     with open(params.labels_path) as label_file:
         labels = str(''.join(json.load(label_file)))
@@ -95,9 +87,9 @@ def main(args):
                       noise_levels=(params.noise_min, params.noise_max))
 
     if args.use_set == 'libri':
-        testing_manifest = params.val_manifest + ("_held{}".format(args.hold_idx) if args.hold_idx >=0 else "")
+        testing_manifest = params.test_manifest + ("_held{}".format(args.hold_idx) if args.hold_idx >=0 else "")
     else:
-        testing_manifest = params.test_manifest
+        assert False, "Only the librispeech dataset is currently supported."
 
     if args.batch_size_val > 0:
         params.batch_size_val = args.batch_size_val
@@ -146,7 +138,7 @@ def main(args):
     model.eval()
     wer, cer, trials = eval_model_verbose(model, test_loader, decoder, params.cuda, args.n_trials)
     root = os.getcwd()
-    outfile = osp.join(root, "inference_bs{}_i{}_gpu{}.csv".format(params.batch_size_val, args.hold_idx, params.cuda))
+    outfile = osp.join(root, "inference_bs{}_idx{}_gpu{}.csv".format(params.batch_size_val, args.hold_idx, params.cuda))
     print("Exporting inference to: {}".format(outfile))
     make_file(outfile)
     write_line(outfile, "batch times pre normalized by hold_sec =,{}\n".format(args.hold_sec))
@@ -182,9 +174,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--checkpoint', dest='checkpoint', action='store_true', 
                         help='Enables checkpoint saving of model')
-    parser.add_argument('--save_folder', default='models/', 
-                        help='Location to save epoch models')
-    parser.add_argument('--model_path', default='models/deepspeech_final.pth.tar',
+    parser.add_argument('--model_path', default='./deepspeech_final.pth.tar',
                         help='Location to save best validation model')
     parser.add_argument('--continue_from', required=True, 
                         help='Continue from checkpoint model')
