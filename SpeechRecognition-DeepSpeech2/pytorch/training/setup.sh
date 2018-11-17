@@ -4,10 +4,10 @@ cd ../dataset
 if [ -d "LibriSpeech_dataset" ]
 then
 	echo "\n\nLibrispeech folder found, skipping download.\n\n"
-	sleep 3
+	sleep 2
 else
 	echo "\n\nDownloading all, (est. 120+ min, space req 200G)...\n\n"
-	sleep 3
+	sleep 2
 	sh download_dataset.sh all
 fi
 cd ../inference	
@@ -29,12 +29,12 @@ yes 'y' | sh install_${VARIANT}docker.sh
 
 GROUP="docker"
 sudo usermod -a -G $GROUP $USER
-if [ $(id -gn) != $GROUP ]; then
-  exec sg $GROUP "$0 $*"
-fi
-
+newgrp $GROUP << END						# Need to run docker related items as a user in this group!
+echo "\n\nBuilding Docker Image (up to 8min)\n\n"
+sleep 2
 yes 'y' | sh build_${VARIANT}docker.sh
+END
 
 cd ../inference
-echo "Ready to run: sh ../docker/run_${VARIANT}dev.sh"
+echo "Ready to run:\n\tnewgrp ${GROUP}\n\tsh ../docker/run_${VARIANT}dev.sh"
 
