@@ -7,26 +7,26 @@
 if [ "${1}" = "all" ] 
 then
 	echo "Downloading all..."
-	python data/librispeech.py
+	python librispeech.py
 	exit 0
 fi
 
 if [ "${1}" = "clean" ]
 then
 	echo "Downloading clean only..."
-	python data/librispeech.py --files_to_use train-clean-100.tar.gz,train-clean-360.tar.gz,dev-clean.tar.gz,test-clean.tar.gz
+	python librispeech.py --files_to_use train-clean-100.tar.gz,train-clean-360.tar.gz,dev-clean.tar.gz,test-clean.tar.gz
 	exit 0
 fi
 if [ "${1}" = "clean_dev" ]
 then
 	echo "Downloading clean dev only..."
-	python data/librispeech.py --files_to_use train-clean-100.tar.gz,dev-clean.tar.gz,test-clean.tar.gz
+	python librispeech.py --files_to_use train-clean-100.tar.gz,dev-clean.tar.gz,test-clean.tar.gz
 	exit 0
 fi
 if [ "${1}" = "other" ]
 then
 	echo "Downloading noisy, aka other only..."
-	python data/librispeech.py --files_to_use train-other-500.tar.gz,dev-other.tar.gz,test-other.tar.gz
+	python librispeech.py --files_to_use train-other-500.tar.gz,dev-other.tar.gz,test-other.tar.gz
 	exit 0
 fi
 

@@ -12,4 +12,4 @@ TARGET_ACC=23
 
 MODELS=../results/train/new_training
 # By default we use GPU and batch size of 40
-python test.py --cpu 0 --batch_size_val 40 --checkpoint --continue_from MODELS/deepspeech_${1}.pth.tar --use_set ${2} --seed $RANDOM_SEED --acc $TARGET_ACC --hold_idx ${3} --hold_sec ${4} --n_trials ${5}
+python inference.py --cpu 0 --batch_size_val 40 --checkpoint --continue_from MODELS/deepspeech_${1}.pth.tar --use_set ${2} --seed $RANDOM_SEED --acc $TARGET_ACC --hold_idx ${3} --hold_sec ${4} --n_trials ${5}
