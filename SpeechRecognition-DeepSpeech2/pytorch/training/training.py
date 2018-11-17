@@ -12,12 +12,12 @@ from torch.autograd import Variable
 from warpctc_pytorch import CTCLoss
 import torch.nn.functional as F
 
-from data.bucketing_sampler import BucketingSampler, SpectrogramDatasetWithLength
-from data.data_loader import AudioDataLoader, SpectrogramDataset
-from decoder import GreedyDecoder
-from model import DeepSpeech, supported_rnns
-import params
-from eval_model import eval_model
+from dataset.bucketing_sampler import BucketingSampler, SpectrogramDatasetWithLength
+from dataset.data_loader import AudioDataLoader, SpectrogramDataset
+from model.decoder import GreedyDecoder
+from model.model import DeepSpeech, supported_rnns
+import model.params as params
+from model.eval_model import eval_model
 
 def to_np(x):
     return x.data.cpu().numpy()
@@ -278,9 +278,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='DeepSpeech training')
     parser.add_argument('--checkpoint', dest='checkpoint', 
                         action='store_true', help='Enables checkpoint saving of model')
-    parser.add_argument('--save_folder', default='models/', 
+    parser.add_argument('--save_folder', default='./', 
                         type=str, help='Location to save epoch models')
-    parser.add_argument('--model_path', default='models/deepspeech_final.pth.tar',
+    parser.add_argument('--model_path', default='./deepspeech_final.pth.tar',
                         type=str, help='Location to save best validation model')
     parser.add_argument('--continue_from', default='', 
                         type=str, help='Continue from checkpoint model')
