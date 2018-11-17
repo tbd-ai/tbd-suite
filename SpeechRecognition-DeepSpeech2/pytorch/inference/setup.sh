@@ -6,7 +6,7 @@ then
 	echo "\n\nLibrispeech folder found, skipping download.\n\n"
 	sleep 3
 else
-	echo "\n\n\Downloading clean_dev, (est. 25 min)...\n\n"
+	echo "\n\nDownloading clean_dev, (est. 25 min)...\n\n"
 	sleep 3
 	sh download_dataset.sh clean_dev
 fi
@@ -15,13 +15,23 @@ cd ../inference
 if [ "${1}" = "cuda" ]
 then
 	VARIANT="cuda_"
+	yes 'y' | sudo add-apt-repository ppa:graphics-drivers/ppa
+	yes 'y' | sudo apt-get update
+	yes 'y' | sudo apt-get install nvidia
+	yes 'y' | sudo apt-get install cuda-drivers
+	yes 'y' | sudo apt-get install htop
 else
 	VARIANT=""
 fi
 
 cd ../docker
 yes 'y' | sh install_${VARIANT}docker.sh
-sudo usermod -a -G docker $USER
+
+GROUP="docker"
+sudo usermod -a -G $GROUP $USER
+if [ $(id -gn) != $GROUP ]; then
+  exec sg $GROUP "$0 $*"
+fi
 
 yes 'y' | sh build_${VARIANT}docker.sh
 

@@ -27,6 +27,12 @@ fi
 cd ../docker
 yes 'y' | sh install_${VARIANT}docker.sh
 
+GROUP="docker"
+sudo usermod -a -G $GROUP $USER
+if [ $(id -gn) != $GROUP ]; then
+  exec sg $GROUP "$0 $*"
+fi
+
 yes 'y' | sh build_${VARIANT}docker.sh
 
 cd ../inference
