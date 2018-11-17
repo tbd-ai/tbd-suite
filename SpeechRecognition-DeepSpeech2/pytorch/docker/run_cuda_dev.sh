@@ -9,4 +9,5 @@ nvidia-docker run \
   -v /scratch:/scratch:rw \
   -v /etc/passwd:/etc/passwd:ro \
   -p 5050:5050/tcp \
+  -w /home/$USER \
   -it --rm -u 0 ds2-cuda9cudnn${1}:gpu
