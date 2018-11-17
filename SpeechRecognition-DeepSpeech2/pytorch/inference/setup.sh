@@ -1,10 +1,17 @@
 yes 'y' | sudo apt-get remove unscd; yes 'y' | sudo apt-get install python-pip; pip install sox wget; yes 'y' | sudo apt-get install sox libsox-fmt-mp3
-	
-cd ../dataset
-#sh download_dataset.sh clean_dev
-cd ../inference
 
-echo "what"
+cd ../dataset
+if [ -d "LibriSpeech_dataset" ]
+then
+	echo "\n\nLibrispeech folder found, skipping download.\n\n"
+	sleep 3
+else
+	echo "\n\n\Downloading clean_dev, (est. 25 min)...\n\n"
+	sleep 3
+	sh download_dataset.sh clean_dev
+fi
+cd ../inference	
+
 if [ "${1}" = "cuda" ]
 then
 	VARIANT="cuda_"
