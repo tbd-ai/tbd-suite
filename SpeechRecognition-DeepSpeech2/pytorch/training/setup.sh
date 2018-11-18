@@ -22,6 +22,8 @@ then
 	yes 'y' | sudo apt-get install htop
 else
 	VARIANT=""
+	echo "\n\nConsider using a GPU machine for training!\n\n"
+	sleep 2
 fi
 
 cd ../docker

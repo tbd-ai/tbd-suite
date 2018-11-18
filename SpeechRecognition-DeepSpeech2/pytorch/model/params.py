@@ -32,7 +32,7 @@ rnn_type      = 'gru' #Type of the RNN. rnn|gru|lstm are supported
 rnn_act_type  = 'tanh' #Type of the activation within RNN. tanh | relu are supported
 
 # Training parameters
-epochs          = 17 # Number of training epochs PAPER = 20
+epochs          = 20 # Number of training epochs PAPER = 20
 learning_anneal = 1.01 # Annealing applied to learning rate every epoch PAPER = 1.2
 lr              = 0.0001 # initial learning rate PAPER = [1E-4, 6E-4]
 momentum        = 0.90 # momentum PAPER = .99
