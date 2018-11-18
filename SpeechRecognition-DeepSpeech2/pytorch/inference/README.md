@@ -1,7 +1,6 @@
 # Inference
 
-TODO: Seperate inference dependencies
-TODO: Instructions on downloading model weights
+TODO: Seperate inference dependencies, give instructions on downloading model weights
 
 ## Environment set up
 Environment requirement: Ubuntu 16.04, 20 GB disk  
@@ -34,7 +33,7 @@ docker images
 	
 ## Dataset
 
-We use ["OpenSLR LibriSpeech Corpus"](http://www.openslr.org/12/) dataset, which provides over 1000 hours of speech data in the form of raw audio. The dataset itself is over 100GB, and intermediate files during download, processing, and verification require 220GB of free disk space to complete.
+We use ["OpenSLR LibriSpeech Corpus"](http://www.openslr.org/12/) dataset, which provides over 1000 hours of speech data in the form of raw audio. The dataset itself is over 100GB, but for inference testing purpose it only require 30 GB of free disk space
 
 #### The following of this section assumes working directory dataset/
 
