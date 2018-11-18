@@ -11,6 +11,12 @@ then
 	exit 0
 fi
 
+if [ "${1}" = "train" ]
+then
+	echo "Downloading clean only..."
+	python librispeech.py --files_to_use train-clean-100.tar.gz,train-clean-360.tar.gz,train-other-500.tar.gz,dev-clean.tar.gz
+	exit 0
+fi
 if [ "${1}" = "clean" ]
 then
 	echo "Downloading clean only..."
