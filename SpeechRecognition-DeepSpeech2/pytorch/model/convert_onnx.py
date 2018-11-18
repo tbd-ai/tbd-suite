@@ -26,9 +26,7 @@ import params
 print("FORCE CPU...")
 params.cuda = False
 
-def convert(parser):
-    args = parser.parse_args()
-
+def convert(args):
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed_all(args.seed)
 
@@ -131,9 +129,7 @@ def convert(parser):
                       export_params=True,      # store the trained parameter weights inside the model file
                       verbose=False)
 
-def onnx_inference(parser):
-    args = parser.parse_args()
-
+def onnx_inference(args):
     # Load the ONNX model
     model = onnx.load("models/deepspeech_{}.onnx".format(args.continue_from))
 
@@ -167,23 +163,25 @@ if __name__=="__main__":
     # Comand line arguments, handled by params except seed    #
     ###########################################################
     parser = argparse.ArgumentParser(description='DeepSpeech training')
-    parser.add_argument('--checkpoint', dest='checkpoint', action='store_true', help='Enables checkpoint saving of model')
-    parser.add_argument('--save_folder', default='models/', help='Location to save epoch models')
+    parser.add_argument('--checkpoint', dest='checkpoint', 
+                        action='store_true', help='Enables checkpoint saving of model')
+    parser.add_argument('--save_folder', default='models/', 
+                        help='Location to save epoch models')
     parser.add_argument('--model_path', default='models/deepspeech_final.pth.tar',
                         help='Location to save best validation model')
-    parser.add_argument('--continue_from', default='', help='Continue from checkpoint model')
+    parser.add_argument('--continue_from', default='', 
+                        help='Continue from checkpoint model')
+    parser.add_argument('--seed', default=0xdeadbeef, 
+                        type=int, help='Random Seed')
+    parser.add_argument('--acc', default=23.0, 
+                        type=float, help='Target WER')
+    parser.add_argument('--start_epoch', default=-1, 
+                        type=int, help='Number of epochs at which to start from')
+    args = parser.parse_args()
 
-    parser.add_argument('--seed', default=0xdeadbeef, type=int, help='Random Seed')
-
-    parser.add_argument('--acc', default=23.0, type=float, help='Target WER')
-
-    parser.add_argument('--start_epoch', default=-1, type=int, help='Number of epochs at which to start from')
-
-    convert(parser)
-
+    convert(args)
     print("=======finished converting models!========")
-
-    onnx_inference(parser)
+    onnx_inference(args)
     print("=======finished checking onnx models!==========")
 
 

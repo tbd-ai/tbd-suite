@@ -19,11 +19,10 @@ noise_max  = 0.5 # maximum noise level to sample from (1.0 means all noise and n
 cuda = True
 
 # Dataset location
-labels_path    = '../labels.json' #Contains all characters for prediction
-train_manifest = '../libri_train_manifest.csv' #relative path to train manifest is download_dataset is used
-val_manifest = '../libri_test_manifest_clean.csv' #relative path to val manifest is download_dataset is used
-#test_manifest = '../libri_test_manifest.csv'	# Librispeech test set NON EXISTENT
-test_manifest = '../cv-valid-test_manifest.csv' # OpenVoice test set
+labels_path    = '../dataset/labels.json' #Contains all characters for prediction
+train_manifest = '../dataset/libri_train_manifest.csv' #relative path to train manifest is download_dataset is used
+val_manifest = '../dataset/libri_val_manifest.csv' #relative path to val manifest is download_dataset is used
+test_manifest = '../dataset/libri_test_manifest.csv'	# Librispeech test set
 
 # Model parameters
 hidden_size   = 2560 # Hidden size of RNNs
@@ -33,7 +32,7 @@ rnn_type      = 'gru' #Type of the RNN. rnn|gru|lstm are supported
 rnn_act_type  = 'tanh' #Type of the activation within RNN. tanh | relu are supported
 
 # Training parameters
-epochs          = 17 # Number of training epochs PAPER = 20
+epochs          = 20 # Number of training epochs PAPER = 20
 learning_anneal = 1.01 # Annealing applied to learning rate every epoch PAPER = 1.2
 lr              = 0.0001 # initial learning rate PAPER = [1E-4, 6E-4]
 momentum        = 0.90 # momentum PAPER = .99
