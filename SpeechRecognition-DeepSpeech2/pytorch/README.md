@@ -53,13 +53,15 @@ We use ["OpenSLR LibriSpeech Corpus"](http://www.openslr.org/12/) dataset, which
 #### The following assumes working directory dataset/
 
 ### Download
-Run
+
+To download full LibriSpeech dataset, run
+
 ```
 sh download_dataset.sh all
 ```
-This will download and process the full LibriSpeech dataset, and dump it into `./LibriSpeech_dataset`, which takes up to 6 hours. Make sure you have 300 GB of free disk.  
+It will download and process the full LibriSpeech dataset, and dump it into `./LibriSpeech_dataset`, which takes up to 6 hours. Make sure you have 300 GB of free disk.  
 
-For purpose of testing & inference, we use clean dataset only, e.g.
+For purpose of inference, we use clean dataset only, e.g.
 ```
 sh download_dataset.sh clean_dev
 ```
