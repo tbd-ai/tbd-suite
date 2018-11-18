@@ -14,9 +14,9 @@ Cd to the `training` directory then run:
 
 The above set up will
 
-	- Download python and necessary libraries
-	- Nividia driver and cuda
-	- LibriSpeech dataset 
+- Download python and necessary libraries
+- Nividia driver and cuda
+- LibriSpeech dataset 
 
 and issue two commands in the final two lines of the execution for you to run next. They should be:
 	
@@ -30,37 +30,37 @@ The run_dev script brings you inside the docker contianer where you can run the 
 	
 The default hyperparameters are:
 
-	- Batchsize 16
-	- Hidden Size 2560
-	- LR 0.0001
-	- LR anneal 1.01
-	- Momentum 0.90
-	- Max Norm 400
-	- SortaGrad enabled
+- Batchsize 16
+- Hidden Size 2560
+- LR 0.0001
+- LR anneal 1.01
+- Momentum 0.90
+- Max Norm 400
+- SortaGrad enabled
 
 ## Advanced Instructions
 
 For the advance user we have provided details that underlies the steps taken by the setup.sh script.
 Machine requirements: Ubuntu 16.04, 200 GB disk, roughly:
 
-	- 190 GB reserved for dataset
-	- 5 GB for docker image
-	- 5 GB overhead and model weights
-	- Graphics card is necessary (for practical reasons)
+- 190 GB reserved for dataset
+- 5 GB for docker image
+- 5 GB overhead and model weights
+- Graphics card is necessary (for practical reasons)
 
 Software dependencies:
 
-	- sox
-	- libsox-fmt-mp3
-	- Python 2.7
-	- Python sox, wget
-	- modified wrap-ctc (from https://github.com/ahsueh1996/warp-ctc.git)
-	- Python h5py
-	- Python hickle
-	- Python tqdm
-	- Python pytorch 0.4.0 (from http://download.pytorch.org/whl/cu80/torch-0.4.0-cp27-cp27mu-linux_x86_64.whl)
-	- Python cffi
-	- Python python-Levenshtein
+- sox
+- libsox-fmt-mp3
+- Python 2.7
+- Python sox, wget
+- modified wrap-ctc (from https://github.com/ahsueh1996/warp-ctc.git)
+- Python h5py
+- Python hickle
+- Python tqdm
+- Python pytorch 0.4.0 (from http://download.pytorch.org/whl/cu80/torch-0.4.0-cp27-cp27mu-linux_x86_64.whl)
+- Python cffi
+- Python python-Levenshtein
 
 GPU Software dependencies:
 
@@ -118,13 +118,13 @@ To enter the contianer, simply run:
 
 We use ["OpenSLR LibriSpeech Corpus"](http://www.openslr.org/12/) dataset, which provides over 1000 hours of speech data in the form of raw audio. It includes:
 	
-	- train-clean-100.tar.gz
-	- train-clean-360.tar.gz
-	- train-other-500.tar.gz
-	- dev-clean.tar.gz
-	- dev-other.tar.gz
-	- test-clean.tar.gz
-	- test-other.tar.gz
+- train-clean-100.tar.gz
+- train-clean-360.tar.gz
+- train-other-500.tar.gz
+- dev-clean.tar.gz
+- dev-other.tar.gz
+- test-clean.tar.gz
+- test-other.tar.gz
 
 When downloading the dataset, you will need the `sox, wget` and `libsox-fmt-mp3` dependencies.
 You may choose to download the dataset after entering the docker container but it is fine to download without docker also.
@@ -170,12 +170,12 @@ Then:
 
 The default hyperparameters are:
 
-	- Batchsize 16
-	- Hidden Size 2560
-	- LR 0.0001
-	- LR anneal 1.01
-	- Momentum 0.90
-	- Max Norm 400
-	- SortaGrad enabled
+- Batchsize 16
+- Hidden Size 2560
+- LR 0.0001
+- LR anneal 1.01
+- Momentum 0.90
+- Max Norm 400
+- SortaGrad enabled
 
 You may edit `../model/params.py` to change the hyperparameters.

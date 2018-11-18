@@ -92,7 +92,7 @@ Details:
 
 # Key Result Summary
 
-A result sumary can be found via google doc https://docs.google.com/document/d/1sDra8B-g7GXLaza33iCUlDEK6_5KZQ23bwszyJUPSYA/
+A result summary can be found via google doc https://docs.google.com/document/d/1sDra8B-g7GXLaza33iCUlDEK6_5KZQ23bwszyJUPSYA/edit?usp=sharing
 
 - Inference results
     - results under https://github.com/tbd-ai/tbd-suite/tree/master/SpeechRecognition-DeepSpeech2/pytorch/results/inference
@@ -111,7 +111,11 @@ A result sumary can be found via google doc https://docs.google.com/document/d/1
 |13			|--			|34.1				|"Aggressive LR"|
 |20			|21.1		|33.7				|"Aggressive LR"|
 
+Please see the results summary doc for details on the hyperparameters: https://docs.google.com/document/d/1sDra8B-g7GXLaza33iCUlDEK6_5KZQ23bwszyJUPSYA/edit?usp=sharing
+
 ### Performance
+
+You can see performance plots here: https://docs.google.com/document/d/1sDra8B-g7GXLaza33iCUlDEK6_5KZQ23bwszyJUPSYA/edit?usp=sharing
 
 - Roughly 3x realtime speed up (audio clip duration / latency) on CPU
 
