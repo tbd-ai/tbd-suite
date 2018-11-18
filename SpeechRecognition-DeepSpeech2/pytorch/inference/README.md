@@ -44,9 +44,9 @@ The default settings will run inference with
 For the advance user we have provided details that underlies the steps taken by the setup.sh script.
 Machine requirements: Ubuntu 16.04, 15 GB disk, roughly:
 
-- 5 GB for dataset
+- 1 GB for dataset
 - 5 GB for docker image
-- 5 GB overhead and model weights
+- 9 GB overhead and model weights
 - Graphics card is optional (choosing one with more memory is better)
 
 Software dependencies:
@@ -139,7 +139,7 @@ For inference, we use clean dataset only. Specifically only the `test-clean.tar.
 
 	sh download_dataset.sh clean_test
 
-which takes around 8 mins and uses 5 GB of disk space.
+which takes around 1.5 mins and uses 1 GB of disk space.
 The download script will do some preprocessing and audio file extractions. Here are some things to note:
 	
   - Data preprocessing:

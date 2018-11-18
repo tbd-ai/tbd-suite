@@ -6,7 +6,7 @@ then
 	echo "\n\nLibrispeech folder found, skipping download.\n\n"
 	sleep 2
 else
-	echo "\n\nDownloading clean_test, (est. 8 min, space req 5G)...\n\n"
+	echo "\n\nDownloading clean_test, (est. 1.5 min, space req 1G)...\n\n"
 	sleep 2
 	sh download_dataset.sh clean_test
 fi

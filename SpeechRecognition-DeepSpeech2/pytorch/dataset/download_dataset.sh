@@ -36,7 +36,7 @@ then
 fi
 if [ "${1}" = "clean_test" ]
 then
-	echo "Downloading clean dev only..."
+	echo "Downloading clean test only..."
 	python librispeech.py --files_to_use test-clean.tar.gz
 	exit 0
 fi
