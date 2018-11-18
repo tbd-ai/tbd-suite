@@ -1,4 +1,6 @@
-## Env set up
+# Training
+
+## Environment set up
 Environment requirement: Ubuntu 16.04 with sox installed, 200GB disk  
 
 We reconmend building docker image to be consistent with our development environment. And we will provide docker set up scripts here. Alternatively, you can build a conda environment, but just be cautious with the dependencies.  
