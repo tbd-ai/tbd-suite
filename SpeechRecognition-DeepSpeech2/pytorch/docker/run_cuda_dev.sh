@@ -3,7 +3,7 @@
 #${1} = {<nothing>, .py3} 				Use either the training/inference docker image or the python 3 docker image for ONNX conversion
 
 nvidia-docker run \
-  --shm-size 64G \
+  --shm-size 2G \
   --network host \
   -v /home/$USER:/home/$USER:rw \
   -v /scratch:/scratch:rw \

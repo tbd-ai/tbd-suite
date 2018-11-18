@@ -9,137 +9,98 @@ The model size was updated to be more representative of speech recognition netwo
 The trained models are the vanilla models (good for forming a standardized benchmark) however if you would like a higher accuracy, you will have to opitimize the hyperparameters or the data-preprocessing further.
 
 # 3. Directions
-### Workflow
-1. Install nvidia, cuda and audio drivers and support
-2. Build a docker image for your machine
-3. Download the dataset
-4. Run the docker image
-5. Run training
-6. Run testing
+The following is the standard workflow for those who intend to run both training and inference. For people who merely just want to run training or inference, please refer to README under the corresponding folder.
 
-### Steps 1-2: Configure machine
-Suggested environment : Ubuntu 16.04, 8 CPUs, one P100, 300GB disk
+## Workflow
+1. Environment set up
+2. Download & preprocess dataset
+3. Run training
+4. Run inference
 
-Assume sufficiently recent NVIDIA driver is installed. Check with
+## Env set up
+Environment requirement: Ubuntu 16.04 with sox installed, 300GB disk  
 
-    nvidia-smi
+We reconmend building docker image to be consistent with our development environment. And we will provide docker set up scripts here. Alternatively, you can build a conda environment, but just be cautious with the dependencies.  
 
-Here is a suggestion for how to get a driver (but you should really _check out which driver version is required for your hardware_).
+### Build docker image
 
-    sudo add-apt-repository ppa:graphics-drivers/ppa
-    sudo apt-get update
-    sudo apt-get install cuda-drivers
+Before proceeding, please make sure docker has been installed. You can install docker using the following script:
+```
+sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo apt-key fingerprint 0EBFCD88
+sudo add-apt-repository    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+sudo apt update
+sudo apt install docker-ce -y
+```
 
-You may need Cuda 9.0:
+Then cd to docker folder, run:
 
-    wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.0.176-1_amd64.deb
-    sudo dpkg -i cuda-repo-ubuntu1604_9.0.176-1_amd64.deb
-    sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
-    sudo apt-get update
-    sudo apt-get install cuda-libraries-9-0
-
-You may need to install docker before using our script:
-
-    sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    sudo apt-key fingerprint 0EBFCD88
-    sudo add-apt-repository    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-       $(lsb_release -cs) \
-       stable"
-    sudo apt update
-    sudo apt install docker-ce -y
-
-Use our script to install nvidia-docker (Note, echo $USER to see that your username is set as a environment variable):
-
-	sh script/docker/install_cuda_docker.sh
-Crucially, add your username to the docker usergroup to avoid having to sudo run the container (causes problems later).
-
-	sudo usermod -a -G docker $USER
-	newgrp docker
-
-Use our script to build your docker image:
-
-	sh script/docker/build-docker.sh
-There are 14 sections in this script. This script is installing pytorch, torchaudio, pip, and various other dependencies to the image. To check for completion:
-
-	docker images
-You should see
-
-	ds2-cuda9cudnn
+```
+sh build_cuda_docker.sh
+```
+which will build a docker image based on `Dockerfile.gpu` which lists library dependencies for running both training & inference. To see whether an image has been successfully built, you should see your newly built image after running:
+```
+docker images
+```
 	
-### Step 3: Download and verify data
-The `download_dataset` script will use the python data utils defined in the `data` directory to download and process the full LibriSpeech dataset into `./LibriSpeech_dataset`.  This takes up to 6 hours.
-The `verify_dataset` script will build a single tarball of the dataset, checksum it, compare against a reference checksum, and report whether they match.  This takes up to an hour.
-The dataset itself is over 100GB, and intermediate files during download, processing, and verification require 220GB of free disk space to complete.
-Here is a template idea that uses a extra disk to hold the dataset:
+## Dataset
 
-	sudo mkdir /scratch
-	sudo mount /dev/sdb1 /scratch
-	sudo chown -R $USER:docker /scratch
+We use ["OpenSLR LibriSpeech Corpus"](http://www.openslr.org/12/) dataset, which provides over 1000 hours of speech data in the form of raw audio. The dataset itself is over 100GB, and intermediate files during download, processing, and verification require 220GB of free disk space to complete.
+
+#### The following assumes working directory dataset/
+
+### Download
+Run
+```
+sh download_dataset.sh all
+```
+This will download and process the full LibriSpeech dataset, and dump it into `./LibriSpeech_dataset`, which takes up to 6 hours. Make sure you have 300 GB of free disk.  
+
+For purpose of testing & inference, we use clean dataset only, e.g.
+```
+sh download_dataset.sh clean_dev
+```
+which takes around 25 mins and uses 15 GB of disk space.  
+
+Some notes:	
+  - Data preprocessing:
+    - The audio files are sampled at 16kHz.
+    - All inputs are also pre-processed into a spectrogram of the first 13 mel-frequency cepstral coefficients (MFCCs).
 	
-Clone our repo onto /scratch and proceed to downloading the dataset in that directory. Then use the link:
-
-	ln -s /scratch/you/directory/libri_train_manifest.csv /home/$USER/your/directory/
-
-We suggest using tmux to encapsulate the actual download which will take a while.
-
-	tmux new -s tbd_ds2
-	tmux attach -t tbd_ds2
-    	sh script/download_dataset.sh all
+  - Training and test data separation:
+    - After running the `download_dataset` script, the `LibriSpeech_dataset` directory will have subdirectories for training set, validation set, and test set.
+    - Each contains both clean and noisy speech samples.
 	
-We provide several options in the download script: all, clean, clean_small, other. These refer to the actual samples that the training and inference will consider.
+  - Data order:
+    - Audio samples are sorted by length.
 
-Note that the example verification script works only with "all" because only it's reference checksum is provided.
-You should also run verification inside the docker container (see next step).
+### Run training and testing
+After successfully building the docker image, you can proceed to launch the docker instance (making path modifications as necessary), and start training & testing.
 
-Publication/Attribution:
+To launch the docker instance, cd to docker/ and run:
+```
+sh run_dev.sh
+```
 
-	["OpenSLR LibriSpeech Corpus"](http://www.openslr.org/12/) provides over 1000 hours of speech data in the form of raw audio.
-	
-Data preprocessing:
+NOTE: remember to modify paths in `docker/run-dev.sh` as appropriate (e.g., replace line 3 with the base path for the repo `~/mlperf/speech_recognition` or similar).
 
-	The audio files are sampled at 16kHz.
-	All inputs are also pre-processed into a spectrogram of the first 13 mel-frequency cepstral coefficients (MFCCs).
-	
-Training and test data separation:
+You should be in the docker container after running the above command. To start training, navigate to pytorch/ and run:
 
-	After running the `download_dataset` script, the `LibriSpeech_dataset` directory will have subdirectories for training set, validation set, and test set.
-	Each contains both clean and noisy speech samples.
-	
-Data order:
+```
+sh script/run_training.sh new | tee my_training_log.out
+```
 
-	Audio samples are sorted by length.
+which will start training a new model and recording all std output to `my_training_log.out`. It will run until the specified target accuracy is achieved or 10 full epochs have elapsed, whichever is sooner. The maximum number of epochs, along with other network parameters, can be viewed and modified in `model/params.py`. 
 
-### Step 4: Run docker container
-Now we can spin the docker image up into an actual container. We suggest using tmux as well.
+To do testing, inside the docker container run the following after training completed:
 
-	tmux new -s tbd_ds2
-	tmux attach -t tbd_ds2
-	sh script/docker/run-dev.sh
+```
+sh inference/run_inference.sh 10 libri -1 1 -1 | tee my_inference_result.out
+```
 
-This script will add the /scratch folder and the /home/$USER/your/directory/ as volumes so you can pass files to and from the container and your parent OS.
-
-### Steps to run and time
-For each framework, there is a provided docker file and `run_and_time.sh` script.
-To run the benchmark, (1) build the docker image, if you haven't already, (2) launch the docker instance (making path modifications as necessary), and (3) run and time the `run_and_time` script, optionally piping output to a log file.
-For example, for the pytorch framework:
-
-    cd pytorch
-    cd docker
-    sh build-docker.sh
-    sh run-dev.sh
-    time sh run_and_time.sh | tee speech_ds2.out
-
-NOTE: remember to modify paths in `docker/run-dev.sh` as appropriate (e.g., replace line 3 with the base path for the repo `~/mlperf/reference/speech_recognition` or similar).
-
-The model will run until the specified target accuracy is achieved or 10 full epochs have elapsed, whichever is sooner. The maximum number of epochs, along with other network parameters, can be viewed and modified in `pytorch/params.py`.
-
-### Step 5-6: Training and testing
-Simply run from inside the docker container:
-
-	sh script/train.sh new | tee my_training_log.out
-	sh script/test.sh 20 libri -1 1 -1 | tee my_inference_result.out
-	
 # 4. Model
 ### Publication/Attribution
 This is an implementation of [DeepSpeech2](https://arxiv.org/pdf/1512.02595.pdf) adapted from [deepspeech.pytorch](https://github.com/SeanNaren/deepspeech.pytorch).
@@ -211,4 +172,4 @@ Details:
 
 # 5. Quality
 Best WER 21.2 on Librispeech Test Clean.
-See results/training/training\ 1 for more details.
+Navigate to results/ for more details.
