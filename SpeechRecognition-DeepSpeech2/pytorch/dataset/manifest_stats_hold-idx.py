@@ -4,6 +4,7 @@ import csv
 import argparse
 import sys
 import sox
+from random import shuffle
 
 example_wavfile = '/scratch/jacob/training/speech_recognition/LibriSpeech_dataset/test/wav/2414-128291-0020.wav'
 example_txtfile = '/scratch/jacob/training/speech_recognition/LibriSpeech_dataset/test/txt/2414-128291-0020.txt'
@@ -37,7 +38,7 @@ def make_manifest(inputfile, root, idx):
     if idx == -1:
         idx = ""
     else:
-        idx = '_held'
+        idx = '_held{}'.format(idx)
     base = osp.basename(inputfile)
     base = base + idx
     manifest_file = osp.join(root, base)
@@ -68,6 +69,7 @@ if __name__ == "__main__":
     parser.add_argument('--file', help='some manifest file with the first col containing the wav file path')
     parser.add_argument('--hold_idx', default=-1, type=int)
     parser.add_argument('--stats', dest='stats', action='store_true')
+    parser.add_argument('--scramble_repeat', default=-1, type=int)
     args = parser.parse_args()
     root = os.getcwd()		# the root is the current working directory
     filepath = osp.join(os.getcwd(),args.file)
@@ -78,6 +80,10 @@ if __name__ == "__main__":
         make_folder(manifest_file)
         make_file(manifest_file)
         audio_dur = AverageMeter()
+    elif args.scramble_repeat > 1:
+        manifest_file = filepath + "_scram_rep"
+        make_folder(manifest_file)
+        make_file(manifest_file)
     else: 
         manifest_file = make_manifest(filepath, root, args.hold_idx)
     print("Manifest made: {}".format(manifest_file))
@@ -86,12 +92,29 @@ if __name__ == "__main__":
     tot = 0
     hold_file = ""
     hold_entry = ""
+    repeat_store = []
     for i, row in enumerate(summary):
         tot += 1;
         if args.hold_idx == i:
             #(hold_file, hold_entry) = format_entry(row, root)
             hold_file = row[0]
             hold_entry = row[1]
+        elif args.scramble_repeat > 1:
+            repeat_store.append(row[0]+","+row[1])
+    if args.scramble_repeat > 1:
+        for i in range(args.scramble_repeat+1):
+            shuffle(repeat_store)
+            if i == 0:
+                # First is the warmup pad
+                for j,row in enumerate(repeat_store):
+                    if j >= 50:
+                        break
+                    write_line(manifest_file,row+"\n")
+            else:
+                for j,row in enumerate(repeat_store):
+                    write_line(manifest_file,row+"\n")
+            print("Rep {}".format(i))
+        exit(0)
     cur = 0
     f.seek(0)
     new_file = hold_entry
