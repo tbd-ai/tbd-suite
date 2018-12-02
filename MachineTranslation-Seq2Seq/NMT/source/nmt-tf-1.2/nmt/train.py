@@ -436,6 +436,7 @@ def train(hparams, scope=None, target_session="", single_cell_fn=None):
       # Reset timer and loss.
       step_time, checkpoint_loss, checkpoint_predict_count = 0.0, 0.0, 0.0
       checkpoint_total_count = 0.0
+      checkpoint_total_samples = 0.0
 
     if global_step - last_eval_step >= steps_per_eval:
       last_eval_step = global_step

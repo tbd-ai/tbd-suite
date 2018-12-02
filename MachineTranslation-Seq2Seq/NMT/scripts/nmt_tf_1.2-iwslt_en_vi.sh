@@ -31,7 +31,7 @@ cd $NMT_ROOT/source/nmt-tf-1.2 && \
 $PREFIX python2 -m nmt.nmt --src=en --tgt=vi \
                            --hparams_path=$NMT_ROOT/hparams/$HPARAM_FNAME \
                            --out_dir=$NMT_ROOT/models \
-                           --vocab_prefix=$NMT_ROOT/dataset/iwslt15_en-vi/vocab \
-                           --train_prefix=$NMT_ROOT/dataset/iwslt15_en-vi/train \
-                             --dev_prefix=$NMT_ROOT/dataset/iwslt15_en-vi/tst2012 \
-                            --test_prefix=$NMT_ROOT/dataset/iwslt15_en-vi/tst2013
+                           --vocab_prefix=$NMT_ROOT/dataset/iwslt15-vi_en/vocab \
+                           --train_prefix=$NMT_ROOT/dataset/iwslt15-vi_en/train-preproc \
+                             --dev_prefix=$NMT_ROOT/dataset/iwslt15-vi_en/tst2012 \
+                            --test_prefix=$NMT_ROOT/dataset/iwslt15-vi_en/tst2013
