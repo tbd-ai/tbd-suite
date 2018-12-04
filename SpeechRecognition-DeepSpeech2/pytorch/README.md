@@ -1,5 +1,5 @@
 # About
-This version of DeepSpeech2 is adapted from ML-perf for the purpose of providing you a useable model for speech recognition.
+This version of DeepSpeech2 is adapted from MLPerf for the purpose of providing you a useable model for speech recognition.
 You can find the MLPerf repository: https://github.com/mlperf/training/commit/9c6b8b3ed27c2c8bc1e9f697b9d7c0ed75a72efb
 You can find our pytorch and ONNX models: https://drive.google.com/drive/u/1/folders/1K3aIu2qm1R2h55C4-qgGlYOOID6sohru
 
