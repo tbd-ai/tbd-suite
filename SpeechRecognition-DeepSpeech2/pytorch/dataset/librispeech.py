@@ -6,16 +6,6 @@ import subprocess
 from utils import create_manifest
 import shutil
 
-parser = argparse.ArgumentParser(description='Processes and downloads LibriSpeech dataset.')
-parser.add_argument("--target_dir", default='./LibriSpeech_dataset/', type=str, help="Directory to store the dataset.")
-parser.add_argument('--sample_rate', default=16000, type=int, help='Sample rate')
-parser.add_argument('--files_to_use', default="train-clean-100.tar.gz,"
-                                              "train-clean-360.tar.gz,train-other-500.tar.gz,"
-                                              "dev-clean.tar.gz,dev-other.tar.gz,"
-                                              "test-clean.tar.gz,test-other.tar.gz", type=str,
-                    help='list of file names to download')
-args = parser.parse_args()
-
 LIBRI_SPEECH_URLS = {
     "train": ["http://www.openslr.org/resources/12/train-clean-100.tar.gz",
               "http://www.openslr.org/resources/12/train-clean-360.tar.gz",
@@ -43,7 +33,8 @@ def _process_file(wav_dir, txt_dir, base_filename, root_dir):
     txt_transcript_path = os.path.join(txt_dir, base_filename.replace(".flac", ".txt"))
     transcript_file = os.path.join(root_dir, "-".join(base_filename.split('-')[:-1]) + ".trans.txt")
     assert os.path.exists(transcript_file), "Transcript file {} does not exist.".format(transcript_file)
-    transcriptions = open(transcript_file).read().strip().split("\n")
+    with open(transcript_file, 'r+') as f:
+        transcriptions = f.read().strip().split("\n")
     transcriptions = {t.split()[0].split("-")[-1]: " ".join(t.split()[1:]) for t in transcriptions}
     with open(txt_transcript_path, "w") as f:
         key = base_filename.replace(".flac", "").split("-")[-1]
@@ -72,11 +63,7 @@ def main():
             shutil.rmtree(extracted_dir)
         for url in lst_libri_urls:
             # check if we want to dl this file
-            dl_flag = False
-            for f in files_to_dl:
-                if url.find(f) != -1:
-                    dl_flag = True
-            if not dl_flag:
+            if all(url.find(f) == -1 for f in files_to_dl):
                 print("Skipping url: {}".format(url))
                 continue
             filename = url.split("/")[-1]
@@ -84,9 +71,8 @@ def main():
             if not os.path.exists(target_filename):
                 wget.download(url, split_dir)
             print("Unpacking {}...".format(filename))
-            tar = tarfile.open(target_filename)
-            tar.extractall(split_dir)
-            tar.close()
+            with tarfile.open(target_filename) as tar:
+                tar.extractall(split_dir)
             os.remove(target_filename)
             print("Converting flac files to wav and extracting transcripts...")
             assert os.path.exists(extracted_dir), "Archive {} was not properly uncompressed.".format(filename)
@@ -102,4 +88,15 @@ def main():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Processes and downloads LibriSpeech dataset.')
+    parser.add_argument("--target_dir", default='./LibriSpeech_dataset/', type=str,
+                        help="Directory to store the dataset.")
+    parser.add_argument('--sample_rate', default=16000, type=int, help='Sample rate')
+    parser.add_argument('--files_to_use', default="train-clean-100.tar.gz,"
+                                                  "train-clean-360.tar.gz,train-other-500.tar.gz,"
+                                                  "dev-clean.tar.gz,dev-other.tar.gz,"
+                                                  "test-clean.tar.gz,test-other.tar.gz", type=str,
+                        help='list of file names to download')
+    args = parser.parse_args()
+
     main()

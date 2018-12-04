@@ -80,7 +80,8 @@ class Decoder(object):
                     string = string + char
         return string
 
-    def wer(self, s1, s2):
+    @staticmethod
+    def wer(s1, s2):
         """
         Computes the Word Error Rate, defined as the edit distance between the
         two provided sentences after tokenizing to words.
@@ -100,7 +101,8 @@ class Decoder(object):
 
         return Lev.distance(''.join(w1), ''.join(w2))
 
-    def cer(self, s1, s2):
+    @staticmethod
+    def cer(s1, s2):
         """
         Computes the Character Error Rate, defined as the edit distance.
 

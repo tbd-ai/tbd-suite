@@ -19,17 +19,17 @@ parser.add_argument('--output_path', default='merged_manifest.csv', help='Output
 args = parser.parse_args()
 
 files = []
-for file in os.listdir(args.merge_dir):
-    if file.endswith(".csv"):
-        with open(os.path.join(args.merge_dir, file), 'r') as fh:
+for file_name in os.listdir(args.merge_dir):
+    if file_name.endswith(".csv"):
+        with open(os.path.join(args.merge_dir, file_name), 'r') as fh:
             files += fh.readlines()
 
 prune_min = args.min_duration >= 0
 prune_max = args.max_duration >= 0
 if prune_min:
-    print("Pruning files with minimum duration %d" % (args.min_duration))
+    print("Pruning files with minimum duration %d" % args.min_duration)
 if prune_max:
-    print("Pruning files with  maximum duration of %d" % (args.max_duration))
+    print("Pruning files with  maximum duration of %d" % args.max_duration)
 
 new_files = []
 size = len(files)
@@ -42,14 +42,8 @@ for x in range(size):
     )
     duration = float(output)
     if prune_min or prune_max:
-        duration_fit = True
-        if prune_min:
-            if duration < args.min_duration:
-                duration_fit = False
-        if prune_max:
-            if duration > args.max_duration:
-                duration_fit = False
-        if duration_fit:
+        if not ((prune_min and duration < args.min_duration) or
+                (prune_max and duration > args.max_duration)):
             new_files.append((files[x], duration))
     else:
         new_files.append((files[x], duration))
@@ -57,12 +51,7 @@ for x in range(size):
 
 print("\nSorting files by length...")
 
-
-def func(element):
-    return element[1]
-
-
-new_files.sort(key=func)
+new_files.sort(key=lambda element: element[1])
 
 print("Saving new manifest...")
 

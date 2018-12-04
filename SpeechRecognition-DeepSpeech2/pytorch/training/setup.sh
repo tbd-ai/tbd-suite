@@ -1,9 +1,13 @@
-yes 'y' | sudo apt-get remove unscd; yes 'y' | sudo apt-get install python-pip; pip install sox wget; yes 'y' | sudo apt-get install sox libsox-fmt-mp3
+#!/usr/bin/env bash
+sudo apt-get remove unscd;
+sudo apt-get -y install python-pip;
+pip install sox wget;
+sudo apt-get -y install sox libsox-fmt-mp3
 
 cd ../dataset
 if [ -d "LibriSpeech_dataset" ]
 then
-	echo "\n\nLibrispeech folder found, skipping download.\n\n"
+    echo "\n\nLibrispeech folder found, skipping download.\n\n"
 	sleep 2
 else
 	echo "\n\nDownloading all, (est. 120+ min, space req 200G)...\n\n"
@@ -15,11 +19,10 @@ cd ../inference
 if [ "${1}" = "cuda" ]
 then
 	VARIANT="cuda_"
-	yes 'y' | sudo add-apt-repository ppa:graphics-drivers/ppa
-	yes 'y' | sudo apt-get update
-	yes 'y' | sudo apt-get install nvidia
-	yes 'y' | sudo apt-get install cuda-drivers
-	yes 'y' | sudo apt-get install htop
+	sudo add-apt-repository -y ppa:graphics-drivers/ppa
+	sudo apt-get -y update
+	sudo apt-get -y install nvidia
+	sudo apt-get -y install cuda-drivers
 else
 	VARIANT=""
 	echo "\n\nConsider using a GPU machine for training!\n\n"

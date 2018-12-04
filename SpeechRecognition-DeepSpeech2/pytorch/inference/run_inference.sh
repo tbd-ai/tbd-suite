@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Script to test and time DeepSpeech 2 implementation
 
 RANDOM_SEED=1
@@ -18,4 +19,13 @@ N_TRIALS=-1		    #${5}
 BATCHSIZE=1
 MODELS_DIR="."
 # By default we use GPU and batch size of 40
-python inference.py --cpu --batch_size_val ${BATCHSIZE} --checkpoint --continue_from ${MODELS_DIR}/deepspeech_${EPOCH}.pth.tar --use_set ${DATASET} --seed $RANDOM_SEED --acc $TARGET_ACC --hold_idx ${HOLD_IDX} --hold_sec ${HOLD_SEC} --n_trials ${N_TRIALS}
+python inference.py \
+    --cpu \
+    --batch_size_val ${BATCHSIZE} \
+    --checkpoint \
+    --continue_from ${MODELS_DIR}/trained_model_deepspeech2.pth \
+    --use_set ${DATASET} \
+    --seed $RANDOM_SEED \
+    --hold_idx ${HOLD_IDX} \
+    --hold_sec ${HOLD_SEC} \
+    --n_trials ${N_TRIALS}

@@ -33,7 +33,7 @@ class BucketingSampler(Sampler):
         assert hasattr(self.data_source, 'bins_to_samples')
 
     def __iter__(self):
-        for bin, sample_idx in self.data_source.bins_to_samples.items():
+        for b, sample_idx in self.data_source.bins_to_samples.items():
             np.random.shuffle(sample_idx)
             for s in sample_idx:
                 yield s

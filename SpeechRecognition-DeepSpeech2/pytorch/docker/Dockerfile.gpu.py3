@@ -39,14 +39,13 @@ RUN pip3 install h5py \
                 torch==0.4.1 \
                 torchvision \
                 cffi \
-			onnx \
+			    onnx \
                 python-Levenshtein \
                 librosa \
                 wget \
                 tensorboardX
 
-RUN apt-get update && apt-get install --yes --no-install-recommends cmake \
-                                                                    sudo
+RUN apt-get update && apt-get install -yes --no-install-recommends cmake sudo
 
 ENV CUDA_HOME "/usr/local/cuda"
 

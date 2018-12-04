@@ -6,7 +6,6 @@ nvidia-docker run \
   --shm-size 2G \
   --network host \
   -v /home/$USER:/home/$USER:rw \
-  -v /scratch:/scratch:rw \
   -v /etc/passwd:/etc/passwd:ro \
   -p 5050:5050/tcp \
   -w /home/$USER \
