@@ -24,7 +24,7 @@ Install other python packages
 
 ```bash
 cd PyTorch
-pip install -r source/requirements.gpu-cu90.txt
+pip install -r source/requirements.gpu-cu92.txt
 ```
 
 ### Steps to download and verify data
