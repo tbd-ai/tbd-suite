@@ -56,7 +56,8 @@ class NoiseInjection(object):
         noise_level = np.random.uniform(*self.noise_levels)
         return self.inject_noise_sample(data, noise_path, noise_level)
 
-    def inject_noise_sample(self, data, noise_path, noise_level):
+    @staticmethod
+    def inject_noise_sample(data, noise_path, noise_level):
         noise_src = load_audio(noise_path)
         noise_offset_fraction = np.random.rand()
         noise_dst = np.zeros_like(data)
@@ -94,7 +95,7 @@ class SpectrogramParser(AudioParser):
         self.window = windows.get(audio_conf['window'], windows['hamming'])
         self.normalize = normalize
         self.augment = augment
-        self.noiseInjector = NoiseInjection(audio_conf['noise_dir'], self.sample_rate,
+        self.noiseInjector = NoiseInjection(audio_conf['noise_dir'],
                                             audio_conf['noise_levels']) if audio_conf.get(
             'noise_dir') is not None else None
         self.noise_prob = audio_conf.get('noise_prob')
@@ -112,9 +113,9 @@ class SpectrogramParser(AudioParser):
         win_length = n_fft
         hop_length = int(self.sample_rate * self.window_stride)
         # STFT
-        D = librosa.stft(y, n_fft=n_fft, hop_length=hop_length,
+        d = librosa.stft(y, n_fft=n_fft, hop_length=hop_length,
                          win_length=win_length, window=self.window)
-        spect, phase = librosa.magphase(D)
+        spect, phase = librosa.magphase(d)
         # S = log(S+1)
         spect = np.log1p(spect)
         spect = torch.FloatTensor(spect)
@@ -169,6 +170,7 @@ class SpectrogramDataset(Dataset, SpectrogramParser):
     def __len__(self):
         return self.size
 
+
 class SpectrogramAndPathDataset(SpectrogramDataset):
     def __getitem__(self, index):
         sample = self.ids[index]
@@ -177,12 +179,13 @@ class SpectrogramAndPathDataset(SpectrogramDataset):
         transcript = self.parse_transcript(transcript_path)
         return spect, transcript, audio_path
 
+
 class SpectrogramAndLogitsDataset(SpectrogramDataset):
     def __getitem__(self, index):
         sample = self.ids[index]
         audio_path, transcript_path = sample[0], sample[1]
         logit_path = os.path.join(
-        os.path.split(os.path.split(audio_path)[0])[0],
+            os.path.split(os.path.split(audio_path)[0])[0],
             "logits",
             os.path.splitext(os.path.split(audio_path)[1])[0] + ".pth"
         )
@@ -190,6 +193,7 @@ class SpectrogramAndLogitsDataset(SpectrogramDataset):
         transcript = self.parse_transcript(transcript_path)
         logits = torch.load(logit_path)
         return spect, transcript, audio_path, logits
+
 
 def _collate_fn_logits(batch):
     def func(p):
@@ -224,10 +228,11 @@ def _collate_fn_logits(batch):
         input_percentages[x] = seq_length / float(max_seqlength)
         target_sizes[x] = len(target)
         targets.extend(target)
-        logits[x,:logit.size(0)].copy_(logit)
+        logits[x, :logit.size(0)].copy_(logit)
 
     targets = torch.IntTensor(targets)
     return inputs, targets, input_percentages, target_sizes, paths, logits
+
 
 def _collate_fn_paths(batch):
     def func(p):
@@ -254,6 +259,7 @@ def _collate_fn_paths(batch):
         targets.extend(target)
     targets = torch.IntTensor(targets)
     return inputs, targets, input_percentages, target_sizes, paths, None
+
 
 def _collate_fn(batch):
     def func(p):
@@ -288,6 +294,7 @@ class AudioDataLoader(DataLoader):
         super(AudioDataLoader, self).__init__(*args, **kwargs)
         self.collate_fn = _collate_fn
 
+
 class AudioDataAndLogitsLoader(DataLoader):
     def __init__(self, *args, **kwargs):
         """
@@ -295,6 +302,7 @@ class AudioDataAndLogitsLoader(DataLoader):
         """
         super(AudioDataAndLogitsLoader, self).__init__(*args, **kwargs)
         self.collate_fn = _collate_fn_logits
+
 
 class AudioDataAndPathsLoader(DataLoader):
     def __init__(self, *args, **kwargs):
@@ -304,6 +312,7 @@ class AudioDataAndPathsLoader(DataLoader):
         super(AudioDataAndPathsLoader, self).__init__(*args, **kwargs)
         self.collate_fn = _collate_fn_paths
 
+
 def augment_audio_with_sox(path, sample_rate, tempo, gain):
     """
     Changes tempo and gain of the recording with sox and loads it.
@@ -312,8 +321,8 @@ def augment_audio_with_sox(path, sample_rate, tempo, gain):
         augmented_filename = augmented_file.name
         sox_augment_params = ["tempo", "{:.3f}".format(tempo), "gain", "{:.3f}".format(gain)]
         sox_params = "sox \"{}\" -r {} -c 1 -b 16 {} {} >/dev/null 2>&1".format(path, sample_rate,
-                                                                            augmented_filename,
-                                                                            " ".join(sox_augment_params))
+                                                                                augmented_filename,
+                                                                                " ".join(sox_augment_params))
         os.system(sox_params)
         y = load_audio(augmented_filename)
         return y

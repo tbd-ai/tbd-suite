@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Script to download Librispeech Dataset
 # For best results allow downloader to use all dataset files.
 # For the inference baseline, use the clean set.

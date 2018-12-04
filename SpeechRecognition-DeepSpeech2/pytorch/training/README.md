@@ -1,4 +1,4 @@
-# Inference
+# Training
 
 ## Basic Instructions
 
@@ -8,9 +8,11 @@ Choose VM instance(s):
 - Azure NC family or better
 
 Clone this repository.
-Cd to the `training` directory then run:
+In the `training` directory then run:
 
-	sh setup.sh cuda
+```bash
+sh setup.sh cuda
+```
 
 The above set up will
 
@@ -19,15 +21,19 @@ The above set up will
 - LibriSpeech dataset 
 
 and issue two commands in the final two lines of the execution for you to run next. They should be:
-	
-	newgrp docker
-	sh ../docker/run_cuda_dev.sh
+
+```bash
+newgrp docker
+sh ../docker/run_cuda_dev.sh
+```
 
 The run_dev script brings you inside the docker contianer where you can run the training from by running:
 
-	cd <path/to/this/training/folder>
-	sh run_trianing.sh new | tee new_training.out
-	
+```bash
+cd <path/to/this/training/folder>
+sh run_trianing.sh new | tee new_training.out
+```
+
 The default hyperparameters are:
 
 - Batchsize 16
@@ -64,9 +70,9 @@ Software dependencies:
 
 GPU Software dependencies:
 
-	- Correct Nvidia driver
-	- Cuda driver
-	- Cuda 9 
+- Correct Nvidia driver
+- Cuda driver
+- Cuda 9 
 
 You should use docker to ensure that you are using the same environment but you can build a conda environment, but just be cautious with the dependencies. Check into the setup.sh and ../docker/Dockerfile.gpu for exact details.
 
@@ -75,44 +81,56 @@ You should use docker to ensure that you are using the same environment but you 
 Using docker is the simplist way to get all of the dependencies listed above. First we need to get docker.
 For CPU only this is done with:
 
-	cd ../docker
-	install_docker.sh
-	# ---- or equivalently ----
-	sudo apt install docker.io
+```bash
+cd ../docker
+install_docker.sh
+# ---- or equivalently ----
+sudo apt install docker.io
+```
 
 For GPU support run:
 
-	cd ../docker
-	sudo add-apt-repository ppa:graphics-drivers/ppa
-	sudo apt-get update
-	sudo apt-get install nvidia
-	sudo apt-get install cuda-drivers
-	install_cuda_docker.sh
+```bash
+cd ../docker
+sudo add-apt-repository ppa:graphics-drivers/ppa
+sudo apt-get update
+sudo apt-get install nvidia
+sudo apt-get install cuda-drivers
+install_cuda_docker.sh
+```
 
 To run docker, we need to add the user to the `docker` user group, run:
 
-	sudo usermod -a -G docker $USER
-	newgrp docker
-	
+```bash
+sudo usermod -a -G docker $USER
+newgrp docker
+```
+
 We now have the correct docker support to build the images, run:
 
-	cd ../docker
-	# ---- CPU only ----
-	sh build_docker.sh
-	# ---- or if GPU support ----
-	sh build_cuda_docker.sh
+```bash
+cd ../docker
+# ---- CPU only ----
+sh build_docker.sh
+# ---- or if GPU support ----
+sh build_cuda_docker.sh
+```
 
 which will build a docker image based on `Dockerfile.gpu`. To see if the image has been successfully built, you should see your new image listed by running:
 
-	docker images
+```bash
+docker images
+```
 
 To enter the contianer, simply run:
 
-	cd ../docker
-	# ---- CPU only ----
-	sh run_dev.sh
-	# ---- or if GPU support ----
-	sh run_cuda_dev.sh
+```bash
+cd ../docker
+# ---- CPU only ----
+sh run_dev.sh
+# ---- or if GPU support ----
+sh run_cuda_dev.sh
+```
 
 ### Dataset
 
@@ -130,13 +148,25 @@ When downloading the dataset, you will need the `sox, wget` and `libsox-fmt-mp3`
 You may choose to download the dataset after entering the docker container but it is fine to download without docker also.
 Only do the following if you are outside your docker container:
 
-	sudo apt-get install python-pip
-	pip install sox wget
-	sudo apt-get install sox libsox-fmt-mp3
-	
+```bash
+sudo apt-get install python-pip
+pip install sox wget
+sudo apt-get install sox libsox-fmt-mp3
+```
+
+If `pip locale.Error: unsupported locale setting` is reported (which is usually the case on a bare machine), run:
+
+```bash
+export LC_ALL=C
+```
+
+And then do the above install.
+
 For trianing, we use the entire dataset. Run:
 
-	sh download_dataset.sh training
+```bash
+sh download_dataset.sh training
+```
 
 which takes around 2H and uses 100+ GB of disk space.
 Specifically this set consideres all the available training samples but only uses the clean validation and testing samples.
@@ -157,16 +187,20 @@ The download script will do some preprocessing and audio file extractions. Here 
 
 Make sure you are inside your docker contianer. One way to check is to try `git` and seeing that it is not installed or simply exiting your session and running:
 
-	cd ../docker
-	# ---- CPU only ----
-	sh run_dev.sh
-	# ---- or if GPU support ----
-	sh run_cuda_dev.sh
-	
+```bash
+cd ../docker
+# ---- CPU only ----
+sh run_dev.sh
+# ---- or if GPU support ----
+sh run_cuda_dev.sh
+```
+
 Then:
 
-	cd <path/to/this/trianing/folder>
-	sh run_trianing.sh new | tee new_training.out
+```bash
+cd <path/to/this/trianing/folder>
+sh run_trianing.sh new | tee new_training.out
+```
 
 The default hyperparameters are:
 

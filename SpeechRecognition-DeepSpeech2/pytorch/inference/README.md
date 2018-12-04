@@ -7,14 +7,29 @@ Choose VM instance(s):
  
 - Azure F8s_v2 or better,  NC family
 
-Clone this repository. Download the "deepspeech_20.pth.tar" model (from https://drive.google.com/drive/u/1/folders/1OioL2tqOsVWNW0j_I6J7gZxneFBd2gsB) and place it under the inference folder.
-Cd to the inference directory then run (if CPU only):
+Clone this repository. In the inference folder, download the deepspeech.zip" via:
 
-	sh setup.sh
+```bash
+wget https://zenodo.org/record/1713294/files/trained_model_deepspeech2.zip
+```
+
+which is compressed weights of our trained model. Unzip it via:
+
+```bash
+unzip trained_model_deepspeech2.zip
+```
+
+In the inference directory run (if CPU only):
+
+```bash
+sh setup.sh
+```
 
 If you want GPU support run instead:
 
-	sh setup.sh cuda
+```bash
+sh setup.sh cuda
+```
 
 The above set up will
 
@@ -23,15 +38,23 @@ The above set up will
 - LibriSpeech clean test dataset 
 
 and issue two commands in the final two lines of the execution for you to run next. They should be:
-	
-	newgrp docker
-	sh ../docker/run_{cuda_}dev.sh
 
-There will be the {cuda_} portion if you used GPU and nothing if you used the default CPU only setup. 
-The run_dev script brings you inside the docker contianer where you can run the inference from by running:
+```bash
+newgrp docker
+sh ../docker/run_{cuda_}dev.sh
+```
 
-	cd <path/to/this/inference/folder>
-	sh run_inference.sh
+There will be the {cuda_} portion if you used GPU and nothing if you used the default CPU only setup.
+ 
+The run_dev script brings you inside the docker container where you can run the inference from by running:
+
+```bash
+cd <path/to/this/inference/folder>
+sh run_inference.sh
+```
+
+Note that the `run_dev.sh` defaults to only mount the `$USER` folder to docker container. 
+If you store the dataset somewhere else, you should modify the `run_dev.sh` properly.
 	
 The default settings will run inference with
 
@@ -41,7 +64,7 @@ The default settings will run inference with
 
 ## Advanced Instructions
 
-For the advance user we have provided details that underlies the steps taken by the setup.sh script.
+For the advanced user we have provided details that underlies the steps taken by the setup.sh script.
 Machine requirements: Ubuntu 16.04, 15 GB disk, roughly:
 
 - 1 GB for dataset
@@ -76,44 +99,56 @@ You should use docker to ensure that you are using the same environment but you 
 Using docker is the simplist way to get all of the dependencies listed above. First we need to get docker.
 For CPU only this is done with:
 
-	cd ../docker
-	install_docker.sh
-	# ---- or equivalently ----
-	sudo apt install docker.io
+```bash
+cd ../docker
+install_docker.sh
+# ---- or equivalently ----
+sudo apt install docker.io
+```
 
 For GPU support run:
 
-	cd ../docker
-	sudo add-apt-repository ppa:graphics-drivers/ppa
-	sudo apt-get update
-	sudo apt-get install nvidia
-	sudo apt-get install cuda-drivers
-	install_cuda_docker.sh
+```bash
+cd ../docker
+sudo add-apt-repository ppa:graphics-drivers/ppa
+sudo apt-get update
+sudo apt-get install nvidia
+sudo apt-get install cuda-drivers
+install_cuda_docker.sh
+```
 
 To run docker, we need to add the user to the `docker` user group, run:
 
-	sudo usermod -a -G docker $USER
-	newgrp docker
-	
+```bash
+sudo usermod -a -G docker $USER
+newgrp docker
+```
+
 We now have the correct docker support to build the images, run:
 
-	cd ../docker
-	# ---- CPU only ----
-	sh build_docker.sh
-	# ---- or if GPU support ----
-	sh build_cuda_docker.sh
+```bash
+cd ../docker
+# ---- CPU only ----
+sh build_docker.sh
+# ---- or if GPU support ----
+sh build_cuda_docker.sh
+```
 
 which will build a docker image based on `Dockerfile.gpu`. To see if the image has been successfully built, you should see your new image listed by running:
 
-	docker images
+```bash
+docker images
+```
 
 To enter the contianer, simply run:
 
-	cd ../docker
-	# ---- CPU only ----
-	sh run_dev.sh
-	# ---- or if GPU support ----
-	sh run_cuda_dev.sh
+```bash
+cd ../docker
+# ---- CPU only ----
+sh run_dev.sh
+# ---- or if GPU support ----
+sh run_cuda_dev.sh
+```
 
 ### Dataset
 
@@ -131,13 +166,25 @@ When downloading the dataset, you will need the `sox, wget` and `libsox-fmt-mp3`
 You may choose to download the dataset after entering the docker container but it is fine to download without docker also.
 Only do the following if you are outside your docker container:
 
-	sudo apt-get install python-pip
-	pip install sox wget
-	sudo apt-get install sox libsox-fmt-mp3
-	
+```bash
+sudo apt-get install python-pip
+pip install sox wget
+sudo apt-get install sox libsox-fmt-mp3
+```
+
+If `pip locale.Error: unsupported locale setting` is reported (which is usually the case on a bare machine), run:
+
+```bash
+export LC_ALL=C
+```
+
+And then do the above install.
+
 For inference, we use clean dataset only. Specifically only the `test-clean.tar.gz` file will be used. Run:
 
-	sh download_dataset.sh clean_test
+```bash
+sh download_dataset.sh clean_test
+```
 
 which takes around 1.5 mins and uses 1 GB of disk space.
 The download script will do some preprocessing and audio file extractions. Here are some things to note:
@@ -158,15 +205,19 @@ The download script will do some preprocessing and audio file extractions. Here 
 Download the "deepspeech_20.pth.tar" model (from https://drive.google.com/drive/u/1/folders/1OioL2tqOsVWNW0j_I6J7gZxneFBd2gsB) and place it under the inference folder.
 Make sure you are inside your docker contianer. One way to check is to try `git` and seeing that it is not installed or simply exiting your session and running:
 
-	cd ../docker
-	# ---- CPU only ----
-	sh run_dev.sh
-	# ---- or if GPU support ----
-	sh run_cuda_dev.sh
+```bash
+cd ../docker
+# ---- CPU only ----
+sh run_dev.sh
+# ---- or if GPU support ----
+sh run_cuda_dev.sh
+```
 	
 Then:
 
-	cd <path/to/this/inference/folder>
-	sh run_inference.sh
+```bash
+cd <path/to/this/inference/folder>
+sh run_inference.sh
+```
 
 You may edit `run_inference.sh` to change the batchsizes of the inference.
