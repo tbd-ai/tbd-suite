@@ -11,21 +11,21 @@ THRESHOLD=0.635
 if [ $# -eq 0 ]
 then
         echo "nvprof disabled"
-        COMMAND="python ./source/ncf.py ml-20m -l 0.0005 -b 2048 --layers 256 256 128 64 -f 64 --seed $seed \
+        COMMAND="python3 ./source/ncf.py ml-20m -l 0.0005 -b 2048 --layers 256 256 128 64 -f 64 --seed $seed \
     	--threshold $THRESHOLD --processes 1 --workers 0"
 
 elif [ "$1" == "--profile" ]
 then
         echo "nvprof is profiling compute utilization"
         COMMAND="nvprof --profile-from-start off --export-profile nvprof_data/compute_utilization%p.nvvp --print-summary \
-        python ./source/ncf.py ml-20m -l 0.0005 -b 2048 --layers 256 256 128 64 -f 64 --seed $seed \
+        python3 ./source/ncf.py ml-20m -l 0.0005 -b 2048 --layers 256 256 128 64 -f 64 --seed $seed \
         --threshold $THRESHOLD --processes 1 --workers 0 --profile"
 
 elif [ "$1" == "--profile-fp32" ]
 then
         echo "nvprof is profiling fp32 utilization"
         COMMAND="nvprof --profile-from-start off --metrics single_precision_fu_utilization --export-profile \
-        nvprof_data/fp32_utilization%p.nvvp --print-summary python ./source/ncf.py ml-20m -l 0.0005 -b 2048 --layers \
+        nvprof_data/fp32_utilization%p.nvvp --print-summary python3 ./source/ncf.py ml-20m -l 0.0005 -b 2048 --layers \
         256 256 128 64 -f 64 --seed $seed --threshold $THRESHOLD --processes 1 --workers 0 --profile"
 
 else
@@ -46,7 +46,7 @@ then
     then
         echo "Start processing ml-20m/ratings.csv"
         t0=$(date +%s)
-        python ./source/convert.py ml-20m/ratings.csv ml-20m --negatives 999
+        python3 ./source/convert.py ml-20m/ratings.csv ml-20m --negatives 999
         t1=$(date +%s)
         delta=$(( $t1 - $t0 ))
         echo "Finish processing ml-20m/ratings.csv in $delta seconds"
