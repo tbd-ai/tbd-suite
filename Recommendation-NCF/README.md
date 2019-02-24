@@ -53,12 +53,33 @@ source scripts/benchmark-ncf.sh --profile-fp32 # Profile for fp32 utilization
 # 3. Pretrained Model
 
 A pretrained model (trained using the default settings available in this source code) can be found on [our group's Google Drive server](https://drive.google.com/open?id=1IaTqcCAWYhFsbvL4bnlJ2oEdGjP9OV7M).
+The NeuMF model, defined in `source/neumf.py`, inherits from the baseclass `nn.Module`. For a full list of functions available in this class, please 
+refer to [the official PyTorch documentation](https://pytorch.org/docs/stable/nn.html).
+
 To use this model, the [PyTorch documentation](https://pytorch.org/docs/master/notes/serialization.html) recommends 
 using the following API calls:
+
 ```bash
-the_model = TheModelClass(*args, **kwargs)
-the_model.load_state_dict(torch.load(PATH))
+layers=[256, 256, 128, 64]
+model = NeuMF(nb_users, nb_items,
+                  mf_dim=64, mf_reg=0.,
+                  mlp_layer_sizes=layers,
+                  mlp_layer_regs=[0. for i in layers])
+model.load_state_dict(torch.load(args.path))
+model=model.cuda
 ```
+Note that the parameters used here are those that were used to train the model available on the server. A basis for
+using this pretrained model is provided in `source/load_model.py`. To use it, ensure that you have downloaded the ml-20
+data by running `scripts/benchmark-ncf.sh` at least once, then provide a path to downloaded the pretrained model as 
+the input argument:
+
+```bash
+python source/load_model.py --path ./pretrained_ncf_model
+```
+ 
+ If you wish to train another instance of the NeuMF model, then please adjust the parameters used to load the model so that they match 
+those used to train it. For example, if you trained it with different layers, then you must load it with the appropriate
+list of layer sizes. 
 
 # 4. Dataset/Environment
 ### Publication/Attribution
@@ -101,3 +122,4 @@ After every epoch through the training data.
 ### Evaluation thoroughness
 
 Every users last item rated, i.e. all held out positive examples.
+
