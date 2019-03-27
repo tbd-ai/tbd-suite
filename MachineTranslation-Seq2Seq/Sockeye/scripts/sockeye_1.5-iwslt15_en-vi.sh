@@ -45,7 +45,7 @@ $PREFIX python3 -m sockeye.train --source $SOCKEYE_ROOT/dataset/train-preproc.en
                                  --bucket-width 10 \
                                  --metrics perplexity \
                                  --optimized-metric bleu \
-                                 --checkpoint-frequency 100 \
+                                 --checkpoint-frequency 1000 \
                                  --max-num-checkpoint-not-improved 80 \
                                  --weight-init uniform --weight-init-scale 0.1 \
                                  --learning-rate-reduce-factor 1.0 \
