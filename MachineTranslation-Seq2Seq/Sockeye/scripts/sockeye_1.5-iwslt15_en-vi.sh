@@ -27,12 +27,12 @@ else
 fi
 
 cd $SOCKEYE_ROOT/source/sockeye-1.5 && \
-$PREFIX python3 -m sockeye.train --source $SOCKEYE_ROOT/dataset/iwslt15_en-vi/train-preproc.en \
-                                 --target $SOCKEYE_ROOT/dataset/iwslt15_en-vi/train-preproc.vi \
-                                 --validation-source $SOCKEYE_ROOT/dataset/iwslt15_en-vi/tst2012.en \
-                                 --validation-target $SOCKEYE_ROOT/dataset/iwslt15_en-vi/tst2012.vi \
-                                 --source-vocab $SOCKEYE_ROOT/dataset/iwslt15_en-vi/vocab.en \
-                                 --target-vocab $SOCKEYE_ROOT/dataset/iwslt15_en-vi/vocab.vi \
+$PREFIX python3 -m sockeye.train --source $SOCKEYE_ROOT/dataset/train-preproc.en \
+                                 --target $SOCKEYE_ROOT/dataset/train-preproc.vi \
+                                 --validation-source $SOCKEYE_ROOT/dataset/tst2012.en \
+                                 --validation-target $SOCKEYE_ROOT/dataset/tst2012.vi \
+                                 --source-vocab $SOCKEYE_ROOT/dataset/vocab.en \
+                                 --target-vocab $SOCKEYE_ROOT/dataset/vocab.vi \
                                  --output $SOCKEYE_ROOT/models/$(basename $0) --overwrite-output \
                                  --encoder rnn --decoder rnn \
                                  --num-layers 2:2 \
