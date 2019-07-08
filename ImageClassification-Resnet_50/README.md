@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This folder contains the TensorFlow/MXNet implementations of the ResNet-50 (v2) image classification model. We use the ImageNet1K dataset for our image classification benchmarks.
+This folder contains the TensorFlow/MXNet/PyTorch implementations of the ResNet-50 (v2) image classification model. We use the ImageNet1K dataset for our image classification benchmarks.
 
 ## References
 
