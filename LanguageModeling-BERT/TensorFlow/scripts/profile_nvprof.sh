@@ -2,7 +2,7 @@ BERT_MODEL=../dataset/model
 BERT_SOURCE=../source
 GLUE_DIR=../dataset/classification
 
-PREFIX="/usr/local/cuda-10.1/bin/nvprof --profile-from-start off \
+PREFIX="/usr/local/cuda-10.1/bin/nvprof --profile-from-start on \
                 --export-profile measurements/inception-tensorflow.nvvp -f --print-summary"
 
 SUFFIX=" --nvprof_on=True"

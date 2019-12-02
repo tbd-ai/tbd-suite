@@ -1,4 +1,3 @@
-dataset/classification
-dataset/model
+dataset/
 scripts/metrics.txt
 scripts/nsight.nsight-cuprof-report
