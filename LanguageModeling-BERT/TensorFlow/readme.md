@@ -32,10 +32,10 @@ The source directory contains:
 
 ## References
 
-[BERT TensorFlow Implementation] (https://github.com/google-research/bert)
+[BERT TensorFlow Implementation](https://github.com/google-research/bert)
 
-[NVIDIA/DeepLearningExamples] (https://github.com/NVIDIA/DeepLearningExamples/tree/master/TensorFlow/LanguageModeling/BERT)
+[NVIDIA/DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples/tree/master/TensorFlow/LanguageModeling/BERT)
 
-[WikiExtractor] (https://github.com/attardi/wikiextractor)
+[WikiExtractor](https://github.com/attardi/wikiextractor)
 
-[download_glue_data.py] (https://gist.github.com/W4ngatang/60c2bdb54d156a41194446737ce03e2e)
+[download_glue_data.py](https://gist.github.com/W4ngatang/60c2bdb54d156a41194446737ce03e2e)
