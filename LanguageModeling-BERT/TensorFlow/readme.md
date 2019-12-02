@@ -5,9 +5,9 @@
 This folder contains the TensorFlow implementation of the BERT model for language modeling.  
 
 The dataset directory contains:
-    - model: pretrained weights and config file for the base uncased english model
-    - classification: GLUE data for the classification task
-    - pretrain: Wikipedia data for pretraining BERT from scratch 
+    *- model: pretrained weights and config file for the base uncased english model
+    *- classification: GLUE data for the classification task
+    *- pretrain: Wikipedia data for pretraining BERT from scratch 
 
 The scripts directory contains:
     - pretrain: 
