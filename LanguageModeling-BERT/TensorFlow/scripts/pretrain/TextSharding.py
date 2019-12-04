@@ -332,7 +332,7 @@ class NLTKSegmenter:
 
 if __name__ == "__main__":
     input_files = [sys.argv[1]]
-    output_file_prefix = sys.argv[2] + "/wiki"
+    output_file_prefix = sys.argv[2]
     n_training_shards = 1472
     n_test_shards = 1472
     fraction_test_set = 0.1

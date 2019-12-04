@@ -10,9 +10,9 @@ python3 $DIR"/scripts/pretrain/format_wiki_data.py" $DIR"/dataset/pretrain/extra
 echo "done!"
 
 echo "Sharding wiki data..."
-python3 $DIR"/scripts/pretrain/TextSharding.py" $DIR"/dataset/pretrain/wiki/wikicorpus_en_one_article_per_line.txt" $DIR"/dataset/pretrain/sharded/wiki"
+python3 $DIR"/scripts/pretrain/TextSharding.py" $DIR"/dataset/pretrain/wiki/wikicorpus_en_one_article_per_line.txt" $DIR"/dataset/pretrain/sharded"
 echo "done!"
 
 echo "Creating tf records..."
-python3 $DIR"/scripts/pretrain/create_pretrain_record.py" $DIR"/source/create_pretraining_data.py" $DIR"/dataset/pretrain/sharded/wiki" $DIR"/dataset/pretrain/tfrecord" $DIR"/dataset/model/vocab.txt"
+python3 $DIR"/scripts/pretrain/create_pretrain_record.py" $DIR"/source/create_pretraining_data.py" $DIR"/dataset/pretrain/sharded" $DIR"/dataset/pretrain/tfrecord" $DIR"/dataset/model/vocab.txt"
 echo "done!"
