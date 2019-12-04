@@ -441,9 +441,13 @@ def main(_):
 
   input_files = []
   for input_pattern in FLAGS.input_file.split(","):
+    print("file to be appended")
+    print(tf.gfile.Glob(input_pattern))
     input_files.extend(tf.gfile.Glob(input_pattern))
 
   tf.logging.info("*** Reading from input files ***")
+  print(FLAGS.input_file)
+  print(input_files)
   for input_file in input_files:
     tf.logging.info("  %s", input_file)
 

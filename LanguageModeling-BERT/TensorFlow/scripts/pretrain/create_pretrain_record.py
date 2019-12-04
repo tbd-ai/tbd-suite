@@ -7,7 +7,7 @@ if __name__ == "__main__":
     masked_lm_prob = 0.15
     random_seed = 12345
     dupe_factor = 5
-    output_file_prefix = 'sharded'
+    output_file_prefix = 'wiki'
     n_training_shards = 1472
     n_test_shards = 1472
     create_pretrain_script = sys.argv[1]
@@ -16,6 +16,9 @@ if __name__ == "__main__":
     vocab_file = sys.argv[4]
 
     def create_record_worker(filename_prefix, shard_id, output_format='tfrecord', split='training'):
+        print("################################################################################################")
+        print("Input file: {}".format(input_file + '/' + split + '/' + filename_prefix + '_' + str(shard_id) + '.txt'))
+        print("################################################################################################")
         bert_preprocessing_command = 'python3 ' + create_pretrain_script
         bert_preprocessing_command += ' --input_file=' + input_file + '/' + split + '/' + filename_prefix + '_' + str(shard_id) + '.txt'
         bert_preprocessing_command += ' --output_file=' + output_file + '/' + split + '/' + filename_prefix + '_' + str(shard_id) + '.' + output_format
