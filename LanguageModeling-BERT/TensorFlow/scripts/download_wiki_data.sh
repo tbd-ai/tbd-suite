@@ -4,6 +4,7 @@ echo "setting up directories..."
 mkdir model && mkdir pretrain
 cd pretrain
 mkdir download && mkdir extracted && mkdir formatted && mkdir sharded && mkdir tfrecord && mkdir results 
+cd sharded && mkdir "test" && mkdir "training"
 
 cd download 
 echo "Downloading english wikipedia data..."

@@ -16,6 +16,7 @@ from itertools import islice
 
 import multiprocessing
 import os
+import sys
 import statistics
 
 class Sharding:
@@ -328,3 +329,18 @@ class NLTKSegmenter:
 
     def segment_string(self, article):
         return nltk.tokenize.sent_tokenize(article)
+
+if __name__ == "__main__":
+    input_files = [sys.argv[1]]
+    output_file_prefix = sys.argv[2] + "/wiki"
+    n_training_shards = 1472
+    n_test_shards = 1472
+    fraction_test_set = 0.1
+
+    segmenter = NLTKSegmenter()
+    sharding = Sharding(input_files, output_file_prefix, n_training_shards, n_test_shards, fraction_test_set)
+
+    sharding.load_articles()
+    sharding.segment_articles_into_sentences(segmenter)
+    sharding.distribute_articles_over_shards()
+    sharding.write_shards_to_disk()
