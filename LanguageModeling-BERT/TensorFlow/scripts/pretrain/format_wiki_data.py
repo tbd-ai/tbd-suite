@@ -53,7 +53,7 @@ class WikicorpusTextFormatting:
                                 article_lines.append(line)
 
 if __name__ == "__main__":
-    wiki_path = "/home/danny/Documents/repos/tbd-suite/LanguageProcessing-BERT/TensorFlow/dataset/pretrain/wiki/"
-    output_filename = wiki_path + "/wikicorpus_en_one_article_per_line.txt"
+    wiki_path = "../../dataset/pretrain/extracted/"
+    output_filename = "../../dataset/pretrain/wiki/wikicorpus_en_one_article_per_line.txt"
     wiki_formatter = WikicorpusTextFormatting(wiki_path, output_filename, recursive=True)
     wiki_formatter.merge()
