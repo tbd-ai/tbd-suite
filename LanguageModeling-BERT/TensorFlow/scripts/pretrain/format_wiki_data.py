@@ -29,14 +29,14 @@ class WikicorpusTextFormatting:
         processed = 0
         with open(self.output_filename, mode='w', newline='\n') as ofile:
             for filename in Path(self.wiki_path).rglob('wiki_*'):
-                print(filename)
+                name = str(filename)
                 article_lines = []
                 article_open = False
                 total += 1
 
                 try:
-                    with open(filename, mode='r', newline='\n') as file:
-                        print("Started formating {}".format(filename))
+                    with open(name, mode='r', newline='\n') as file:
+                        print("Started formating {}".format(name))
                         for line in file:
                             if '<doc id=' in line:
                                 article_open = True
@@ -52,7 +52,7 @@ class WikicorpusTextFormatting:
                                     article_lines.append(line)
                         processed += 1
                 except Exception as e:
-                    print("Error opening file {}!".format(filename))
+                    print("Error opening file {}!".format(name))
                     print(e)
                     continue
         
