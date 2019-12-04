@@ -31,21 +31,26 @@ class WikicorpusTextFormatting:
                 article_lines = []
                 article_open = False
 
-                with open(filename, mode='r', newline='\n') as file:
-                    print("Started formating {}".format(filename))
-                    for line in file:
-                        if '<doc id=' in line:
-                            article_open = True
-                        elif '</doc>' in line:
-                            article_open = False
-                            for oline in article_lines[1:]:
-                                if oline != '\n':
-                                    ofile.write(oline.rstrip() + " ")
-                            ofile.write("\n\n")
-                            article_lines = []
-                        else:
-                            if article_open:
-                                article_lines.append(line)
+                try:
+                    with open(filename, mode='r', newline='\n') as file:
+                        print("Started formating {}".format(filename))
+                        for line in file:
+                            if '<doc id=' in line:
+                                article_open = True
+                            elif '</doc>' in line:
+                                article_open = False
+                                for oline in article_lines[1:]:
+                                    if oline != '\n':
+                                        ofile.write(oline.rstrip() + " ")
+                                ofile.write("\n\n")
+                                article_lines = []
+                            else:
+                                if article_open:
+                                    article_lines.append(line)
+                except:
+                    print("Error opening file {}!".format(filename))
+                    print("Skipping to next file...")
+                    continue
 
 if __name__ == "__main__":
     wiki_path = sys.argv[1]
