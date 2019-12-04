@@ -25,11 +25,14 @@ class WikicorpusTextFormatting:
 
     # This puts one article per line
     def merge(self):
+        total = 0
+        processed = 0
         with open(self.output_filename, mode='w', newline='\n') as ofile:
             for filename in Path(self.wiki_path).rglob('wiki_*'):
                 print(filename)
                 article_lines = []
                 article_open = False
+                total += 1
 
                 try:
                     with open(filename, mode='r', newline='\n') as file:
@@ -47,10 +50,13 @@ class WikicorpusTextFormatting:
                             else:
                                 if article_open:
                                     article_lines.append(line)
-                except:
+                        processed += 1
+                except Exception as e:
                     print("Error opening file {}!".format(filename))
-                    print("Skipping to next file...")
+                    print(e)
                     continue
+        
+        print("{}/{} files processed".format(processed, total))
 
 if __name__ == "__main__":
     wiki_path = sys.argv[1]
