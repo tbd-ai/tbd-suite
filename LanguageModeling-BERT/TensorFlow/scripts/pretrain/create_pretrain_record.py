@@ -8,6 +8,8 @@ if __name__ == "__main__":
     random_seed = 12345
     dupe_factor = 5
     output_file_prefix = 'sharded'
+    n_training_shards = 1472
+    n_test_shards = 1472
     create_pretrain_script = sys.argv[1]
     input_file = sys.argv[2]
     output_file = sys.argv[3]
@@ -33,12 +35,12 @@ if __name__ == "__main__":
 
         return last_process
 
-    for i in range(1):
+    for i in range(n_training_shards):
         last_process = create_record_worker(output_file_prefix + '_training', i, 'tfrecord', 'training')
 
     last_process.wait()
 
-    for i in range(1):
+    for i in range(n_test_shards):
         last_process = create_record_worker(output_file_prefix + '_test', i, 'tfrecord', 'test')
 
     last_process.wait()
