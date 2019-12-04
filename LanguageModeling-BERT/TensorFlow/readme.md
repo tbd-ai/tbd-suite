@@ -5,11 +5,13 @@
 This folder contains the TensorFlow implementation of the BERT model for language modeling.  
 
 The dataset directory contains:
+
     - model: pretrained weights and config file for the base uncased english model
     - classification: GLUE data for the classification task
     - pretrain: Wikipedia data for pretraining BERT from scratch 
 
 The scripts directory contains:
+
     - pretrain: 
         - create_pretrain_record.py: script from the NVIDIA/DeepLearningExamples BERT repo that transforms text files to tfrecord files.  
         - format_wiki_data.py: script from the NVIDIA/DeepLearningExamples BERT repo that formats the output of the WikiExtractor.
@@ -23,16 +25,17 @@ The scripts directory contains:
     - profile_nvprof.sh: profiles BERT classification fine tuning with nvprof. 
 
 The source directory contains:
+
     - TensorFlow implementation of BERT by Google.
     - optimization_custom.py: updated version of optimization.py that uses the base TF Adam optimizer for distributed strategy compatibility.
     - run_pretraining_custom.py: updated version of run_pretraining.py that switches from TPUEstimator to Estimator, logs next sentence and masked lm loss to training via tensorboard, and uses data distributed and mixed-precision training. 
 
 ## References
 
-[BERT TensorFlow Implementation] (https://github.com/google-research/bert)
+[BERT TensorFlow Implementation](https://github.com/google-research/bert)
 
-[NVIDIA/DeepLearningExamples] (https://github.com/NVIDIA/DeepLearningExamples/tree/master/TensorFlow/LanguageModeling/BERT)
+[NVIDIA/DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples/tree/master/TensorFlow/LanguageModeling/BERT)
 
-[WikiExtractor] (https://github.com/attardi/wikiextractor)
+[WikiExtractor](https://github.com/attardi/wikiextractor)
 
-[download_glue_data.py] (https://gist.github.com/W4ngatang/60c2bdb54d156a41194446737ce03e2e)
+[download_glue_data.py](https://gist.github.com/W4ngatang/60c2bdb54d156a41194446737ce03e2e)
