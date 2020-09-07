@@ -1,0 +1,4 @@
+numba
+tensorflow-gpu==2.1.0
+sympy
+bz2file

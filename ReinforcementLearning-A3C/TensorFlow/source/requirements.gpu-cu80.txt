@@ -1,6 +1,0 @@
-numba
-tensorflow-gpu==1.15.2
-tensorboard==1.0.0a6
-tensorflow.tensorboard
-gym
-gym[atari]

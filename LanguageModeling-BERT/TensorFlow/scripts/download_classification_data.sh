@@ -1,1 +1,0 @@
-python3.7 download_glue_data.py --data_dir ../dataset/classification --tasks all

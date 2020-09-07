@@ -1,6 +1,0 @@
-mxnet-cu80==0.11.0
-gym
-atari-py
-PyOpenGL
-flask
-opencv-python

@@ -1,0 +1,36 @@
+TMP_DIR=/mnt/dataset/t2t_datagen
+DATA_DIR=/mnt/dataset/t2t_data
+TRANSLATIONS_DIR=/mnt/translations
+
+SOURCE_TEST_TRANSLATE_DIR=${TMP_DIR}/dev/newstest2014-fren-src.en.sgm
+REFERENCE_TEST_TRANSLATE_DIR=${TMP_DIR}/dev/newstest2014-fren-ref.en.sgm
+BEAM_SIZE=1
+
+PYTHONIOENCODING="UTF-8"
+
+if [ $1 == "translate" ];
+then
+	echo "t2t-translate-all";
+	t2t-translate-all \
+	  --source=$SOURCE_TEST_TRANSLATE_DIR \
+	  --model_dir=/mnt/output2 \
+	  --translations_dir=$TRANSLATIONS_DIR \
+	  --data_dir=$DATA_DIR \
+	  --problem=translate_ende_wmt32k \
+	  --hparams_set=transformer_base_single_gpu \
+	  --output_dir=/mnt/output_eval \
+	  --t2t_usr_dir=/mnt/dataset/t2t_user \
+	  --beam_size=$BEAM_SIZE \
+	  --model=transformer;
+else
+	echo "t2t-bleu";
+	t2t-bleu \
+	--translations_dir=$TRANSLATIONS_DIR \
+	--model_dir=/mnt/output2 \
+	--data_dir=$DATA_DIR \
+	--problem=translate_ende_wmt32k \
+	--hparams_set=transformer_base_single_gpu \
+	--source=$SOURCE_TEST_TRANSLATE_DIR \
+	--reference=$REFERENCE_TEST_TRANSLATE_DIR \
+	--event_dir=$EVENT_DIR |& tee -a /mnt/scripts/bleu.log
+fi;

@@ -1,0 +1,28 @@
+Identifier: "PertBurstElapsed"
+DisplayName: "% of peak burst rate achieved during unit burst cycles"
+Header {
+  Metrics {
+    Label: "FP32"
+    Name: "sm__inst_executed_pipe_fma.avg.pct_of_peak_burst_elapsed"
+  }
+  Metrics {
+    Label: "FP16"
+    Name: "sm__inst_executed_pipe_fp16.avg.pct_of_peak_burst_elapsed"
+  }
+  Metrics {
+    Label: "FP64"
+    Name: "sm__inst_executed_pipe_fp64.avg.pct_of_peak_burst_elapsed"
+  }
+  Metrics {
+    Label: "SFU"
+    Name: "sm__inst_executed_pipe_xu.avg.pct_of_peak_burst_elapsed"
+  }
+  Metrics {
+    Label: "Tensor"
+    Name: "sm__inst_executed_pipe_tensor.avg.pct_of_peak_burst_elapsed"
+  }
+  Metrics {
+    Label: "Elapsed Cycles"
+    Name: "gpc__cycles_elapsed.max"
+  }
+}
