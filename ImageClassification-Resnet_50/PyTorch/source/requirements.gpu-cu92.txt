@@ -1,4 +1,0 @@
-torch
-torchvision
-tqdm==4.20.0
-numba

@@ -1,17 +1,58 @@
 # ImageClassification-ResNet-MXNet
+## Description
+This is a benchmarking suite for Resnet model under PyTorch.
+The benchmarking source code is adopted from : [github link](https://github.com/apache/incubator-mxnet/tree/master/example/image-classification)
 
-This folder contains the MXNet implementation of the [ResNet](https://github.com/apache/incubator-mxnet/tree/master/example/image-classification) model.
 
-## Prepare Dataset
+The benchmark is performed using the following software environments
+* Ubuntu version: 18.04
+* CUDA version:   10.1
+* CUDNN version:  7.6
+* PyTorch vresion: 1.4
+
+## Hardware Requirements
+
+In order to run the benchmark suite, your machines need to have NVIDIA GPUs with CUDA installed. The CUDA diver version on your machine needs to be >= 418.39 as according to the  [CUDA compatilibility page](https://docs.nvidia.com/deploy/cuda-compatibility/index.html#binary-compatibility).
+
+## Setup
+Please refer to the following steps to set up the environment to perform benchmarks.
+
+### Installing Docker
+[Docker](https://docs.docker.com/get-started/overview/) is an open-platform for developing, shipping, and running applications in a unified, isolated, and packaged environment called containers. This benchmark suites runs within a docker container with a docker version = 19.03. Please refer to the instructions in https://docs.docker.com/engine/install/#server to install docker on your own host device. You will also need to install the NVIDIA runtime for docker to enabnle GPUs inside the container, the intructions are available at https://github.com/NVIDIA/nvidia-container-runtime#installation.
+
+### Building Docker Image
+If this is your first time running the benchmark on the host, please prepare the environment by running the following command. This will install a docker image with the required software versions and packages.
+
+Before building the image, you need to download the installer of NVIDIA® Nsight™ Compute as it is not included in the repo due to size constraints. You can download it from https://developer.nvidia.com/rdp/assets/nsight-compute-2020_1_1_8-Linux-installer, note that you will need to sign up for NVIDIA Developer Membership (free) in order to download the installer. Once it is doanloeded, copy it under the "docker" dicrectory.
+
+```sh
+cp <Location of Nsight Compute Installer> ./docker/
+bash ./build_image.sh
+```
+This will take approximately 5 minutes, and you should see the following message when it finishes
+>>Successfully built xxxxxxxxxx
+>>Successfully tagged tbd-resnet-mxnet:latest
+
+### Running the Container
+Next, start a docker container by running
+```sh
+bash ./start_container.sh <dataset dir>
+```
+This will prompt a shell in the container environment. You will need to provide a dataset directory to ./run_container.sh with the format specified in section [Preparing the dataset](###preparing-the-dataset).
+
+Make sure you are inside of a the docker container by observing the command prompt:
+>>(tbd-resnet-mxnet) user@xxxxxxxxxxx:
+
+### Preparing the Dataset
 
 The original directory of MXNet image classification contains scripts for all MNIST, cifar10 and imagenet datasets. In our benchmark, we use only the imagenet1K dataset.
 
 To use our benchmark, first prepare the dataset according to the following steps:
 
-1, Download and decompress the [imagenet1K 2012 dataset](http://image-net.org/challenges/LSVRC/2012/). Note that you need to sign up for an account at image-net.org to download the dataset. We use the training dataset, in another word, `ImageNet_train`. 
+1, Download and decompress the [imagenet1K 2012 dataset](http://image-net.org/challenges/LSVRC/2012/). Note that you need to sign up for an account at image-net.org to download the dataset. We use the training dataset, in another word, `ImageNet_train`.
 After decompressing, your dataset directory should look like this:
 
-``` shell
+``` bash
 $ DATA_DIR=.... # path to the ImageNet_train directory
 $ ls $DATA_DIR
 n01440764/
@@ -23,32 +64,63 @@ n01484850/
 2, Generate the data format of RecordIO:
 
 ``` shell
-python dataset/im2rec.py --list True --recursive True imagenet1k $DATA_DIR
-python dataset/im2rec.py --resize 240 --quality 95 --num-thread 16 imagenet1k $DATA_DIR
+python /app/source/dataset_utils/im2rec.py --list True --recursive True $DATA_DIR/imagenet1k  $DATA_DIR
+python /app/source/dataset_utils/im2rec.py --resize 240 --quality 95 --num-thread 16 $DATA_DIR/imagenet1k  $DATA_DIR
 ```
 
 You should have a file named `imagenet1k_train.rec` generated, the size of this file is about 46G.
 
-## Run Training
+## Steps to Train and Profile
 
-We choose the following hyper-parameters for the ResNet-50 models:
+### Running End to End Training
 
-Learning rate: 0.1 for 30 epochs, 0.01 for 30 epochs, 0.001 for 40 epochs\
-momentum: 0.9\
-weight decay: 0.0001\
-optimizer: sgd
+To perform end to end training, run the following command for training with default settings
 
-We leave other hyper parameters as default.
-
-Change the `--data-train` option in `scripts/resnet-imagenet.sh`, then start the training by:
-``` shell
-cd scripts
-bash resnet-imagenet.sh
+```bash
+CUDA_VISIBLE_DEVICES=<list of GPU device IDs> bash /app/source/scripts/run_train.sh  <arguments>
 ```
-Change the `--batch-size` option in `scripts/resnet-imagenet.sh` if you want to use a different mini-batch size.
 
-To train a ResNet with more layers, add the `--num-layers` option. Here is an example of `scripts/resnet-imagenet.sh` to train ResNet-152:
-``` shell
-python ../source/train_imagenet.py --gpus 0 --batch-size 16 --image-shape 3,224,224 --num-epochs 100 --network resnet --num-layers 152 --data-train ... # the path to your generated .rec file
+Where <list of GPU device IDs> is a comma separated list of GPUs to use for the training, and  <arguments to /app/source/main.py> are the arguments to the training script, if you want to change the choice of the default hyper-parameter values. The current default setting uses a batch size of 384, which is ideal for 4 GPUs each with 11GB of device memory, you should change the batch size according to your specific hardware setup.
+
+To get more information on the various settings, run
+```bash
+bash /app/source/scripts/run_train.sh  --help
 ```
+for the complete list of available values.
+
+### Measuring Throughput
+To measure the single device raw training throughput of the benchmark for a list of batch sizes, run the following command.
+```bash
+CUDA_VISIBLE_DEVICES=<GPU device IDs>  bash /app/source/scripts/measure_throughput.sh  [stop_iteration]
+```
+
+Where [stop_iteration] is the iteration to stop recording the throughput data, default 1000. Note the program exists after stop_iteration.
+You should see the same training progress as in the previous step, except it will run much shorter (several minutes). The the througput measurements are stored under "./throughput_data" 
+
+### Profiling
+There are two profiling modes (profilers) for this section, nvprof and ncu (nvidia Nsight System)
+
+#### nvprof
+nvprof is used to measure the compute utilization during the benchmark. To do so, the profiler generates the execution timeline of the benchmark, and users can use nvvp to extract the desired information.
+For instructions on how to derive compute utilization from nvvp timelines, please refer to thie [link](https://github.com/UofT-EcoSystem/DNN-Training-Suite#visual-profiler)
+To profile with nvprof, run:
+```bash
+CUDA_VISIBLE_DEVICES=<GPU device IDs>  bash /app/source/scripts/measure_compute_util.sh nvprof [start_iteration] [stop_iteration]
+```
+Where [start_iteration] (e.g. 1000) is the iteration to start recording profiling information and [stop_iteration] (e.g. 2000) is the iteration to finish profiling.
+The output of these the profiling steps are the NVPP timelines, which records kernel launch and memory transfer information during training. All NVVP files are stored under "profiled_data_nvprof", each experiment should output a file size of several hundred MBs.
+
+#### ncu
+ncu is used to measure the various core utilization during the benchmark. Currently, we measure 4 different types of cores, FMA, FP16, TensorCores, and SFU. These values are collected by the profiler through repeated executions of the CUDA kernels.
+This script generates a csv file for each batch size, which records the different hardware performance metrics per each kernel invocation. These files are stored under ./profiled_data_ncu, and are several MBs large. The final result is post-processed by a script at /app/source/coreutil.py, which aggregates all collected performance counter information and reports the average core utilization values throughout the profiled period.
+ 
+ncu is very slow, so please set [start_iteration] and [stop_iteration] to very small vales, between 1 and 10 (It is safe to do so since kernels are repeated for precise measurement).
+
+To profile with ncu, first copy the file from [nsight log parser](/Core-Utilization-Analyzer), then run:
+```bash
+CUDA_VISIBLE_DEVICES=<list of GPU device IDs>  bash /app/source/scripts/measure_compute_util.sh ncu [start_iteration] [stop_iteration]
+# after the command is finished, each batch size choice generates a corresponding csv file, which can be parsed as
+python coreutil.py profiled_data_ncu/batch_[X].csv
+```
+
 

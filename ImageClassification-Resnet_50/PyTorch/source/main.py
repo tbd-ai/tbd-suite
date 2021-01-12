@@ -39,9 +39,9 @@ parser.add_argument('--epochs', default=90, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
-parser.add_argument('-b', '--batch-size', default=256, type=int,
+parser.add_argument('-b', '--batch-size', default=32, type=int,
                     metavar='N',
-                    help='mini-batch size (default: 256), this is the total '
+                    help='mini-batch size (default: 32), this is the total '
                          'batch size of all GPUs on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
@@ -63,7 +63,7 @@ parser.add_argument('--world-size', default=-1, type=int,
                     help='number of nodes for distributed training')
 parser.add_argument('--rank', default=-1, type=int,
                     help='node rank for distributed training')
-parser.add_argument('--dist-url', default='tcp://224.66.41.62:23456', type=str,
+parser.add_argument('--dist-url', default='tcp://0.0.0.0:23456', type=str,
                     help='url used to set up distributed training')
 parser.add_argument('--dist-backend', default='nccl', type=str,
                     help='distributed backend')
@@ -77,6 +77,12 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
                          'fastest way to use PyTorch for either single node or '
                          'multi node data parallel training')
 
+parser.add_argument('--profile_warmup', default=-1, type=int,
+                    help='Iterations to wait for the profiling to become stable')
+parser.add_argument('--profile_finish', default=-1, type=int,
+                    help='Iterations to stop when enough profiling information is collected')
+
+parser.add_argument('--profile', default=False, action='store_true', help="enable nvprof profilling")
 best_acc1 = 0
 
 
@@ -171,9 +177,13 @@ def main_worker(gpu, ngpus_per_node, args):
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda(args.gpu)
 
+    args.lr = args.lr * args.batch_size / 256.0 # normalize the learning rate based on batch size of 256
     optimizer = torch.optim.SGD(model.parameters(), args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
+
+    lr_milestones = [30, 60, 80, 90]
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, lr_milestones, gamma=0.1)
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -184,6 +194,7 @@ def main_worker(gpu, ngpus_per_node, args):
             best_acc1 = checkpoint['best_acc1']
             model.load_state_dict(checkpoint['state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer'])
+            scheduler.load_state_dict(checkpoint['scheduler'])
             print("=> loaded checkpoint '{}' (epoch {})"
                   .format(args.resume, checkpoint['epoch']))
         else:
@@ -234,10 +245,10 @@ def main_worker(gpu, ngpus_per_node, args):
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             train_sampler.set_epoch(epoch)
-        adjust_learning_rate(optimizer, epoch, args)
 
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch, args)
+        scheduler.step()
 
         # evaluate on validation set
         acc1 = validate(val_loader, model, criterion, args)
@@ -254,11 +265,13 @@ def main_worker(gpu, ngpus_per_node, args):
                 'state_dict': model.state_dict(),
                 'best_acc1': best_acc1,
                 'optimizer' : optimizer.state_dict(),
-            }, is_best)
+                'scheduler' : scheduler.state_dict()
+            }, is_best, filename=args.resume)
 
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
     batch_time = AverageMeter()
+    batch_throughput = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
@@ -270,12 +283,14 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     length=len(train_loader)
     end = time.time()
     for i, (input, target) in enumerate(train_loader):
-        if i == length//2:
-            print('Starting profiling for 100 iterations.')
-            cuda.profile_start()
-        if i == length//2 + 100:
+        if i == args.profile_warmup:
+            print('Starting profiling for {} iterations.'.format(args.profile_finish - args.profile_warmup))
+            if args.profile:
+              cuda.profile_start()
+        if i == args.profile_finish:
             print('Profiling completed, stopping profiling and exiting.')
-            cuda.profile_stop()
+            if args.profile:
+              cuda.profile_stop()
             exit()
 
         # measure data loading time
@@ -301,17 +316,21 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         optimizer.step()
 
         # measure elapsed time
-        batch_time.update(time.time() - end)
+        cur_batch_time = time.time() - end
+        batch_time.update(cur_batch_time)
+        if i > args.profile_warmup:
+            batch_throughput.update(  args.batch_size / cur_batch_time )
         end = time.time()
 
-        if i % args.print_freq == 0:
+        if i % args.print_freq == 0 or i+1 == args.profile_finish:
             print('Epoch: [{0}][{1}/{2}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                  'Batch throughput {batch_throughput.val:.3f} ({batch_throughput.avg:.3f}) samples/s\t'
                   'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
                   'Acc@1 {top1.val:.3f} ({top1.avg:.3f})\t'
                   'Acc@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
-                   epoch, i, len(train_loader), batch_time=batch_time,
+                   epoch, i, len(train_loader), batch_time=batch_time,batch_throughput=batch_throughput,
                    data_time=data_time, loss=losses, top1=top1, top5=top5))
 
 
@@ -361,7 +380,9 @@ def validate(val_loader, model, criterion, args):
 
 
 def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
-    torch.save(state, filename)
+    torch.save(state, filename+"tmp")
+    shutil.move(filename+"tmp", filename)
+
     if is_best:
         shutil.copyfile(filename, 'model_best.pth.tar')
 

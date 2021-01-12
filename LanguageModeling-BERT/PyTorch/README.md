@@ -1,0 +1,142 @@
+# LanguageModeling-Bert-PyTorch
+
+## Description
+This is a benchmarking suite for the BERT model under PyTorch.
+The benchmarking source code is adopted from NVIDIA's Deep-learning Example: [github link](https://github.com/NVIDIA/DeepLearningExamples/tree/master/PyTorch/LanguageModeling/BERT)
+
+
+The benchmark is performed using the following software environments
+* Ubuntu version: 18.04
+* CUDA version:   10.1
+* CUDNN version:  7.6
+* PyTorch vresion: 1.4
+
+## Hardware Requirements
+
+In order to run the benchmark suite, your machines need to have NVIDIA GPUs with CUDA installed. The CUDA diver version on your machine needs to be >= 418.39 as according to the  [CUDA compatilibility page](https://docs.nvidia.com/deploy/cuda-compatibility/index.html#binary-compatibility).
+
+## Setup
+Please refer to the following steps to set up the environment to perform benchmarks.
+
+### Installing Docker
+[Docker](https://docs.docker.com/get-started/overview/) is an open-platform for developing, shipping, and running applications in a unified, isolated, and packaged environment called containers. This benchmark suites runs within a docker container with a docker version = 19.03. Please refer to the instructions in https://docs.docker.com/engine/install/#server to install docker on your own host device. You will also need to install the NVIDIA runtime for docker to enabnle GPUs inside the container, the intructions are available at https://github.com/NVIDIA/nvidia-container-runtime#installation.
+
+### Building Docker Image
+If this is your first time running the benchmark on the host, please prepare the environment by running the following command. This will install a docker image with the required software versions and packages. 
+
+Before building the image, you need to download the installer of NVIDIA® Nsight™ Compute as it is not included in the repo due to size constraints. You can download it from https://developer.nvidia.com/rdp/assets/nsight-compute-2020_1_1_8-Linux-installer, note that you will need to sign up for NVIDIA Developer Membership (free) in order to download the installer. Once it is doanloeded, copy it under the "docker" dicrectory.
+
+```sh
+cp <Location of Nsight Compute Installer> ./docker/
+bash ./build_image.sh
+```
+The output contains warnings from the building ther APEX library, pealse ignore those.
+This will take approximately 5 minutes, and you should see the following message when it finishes
+>>Successfully built xxxxxxxxxx
+>>Successfully tagged tbd-bert-pytorch:latest
+
+### Running the Container
+Next, start a docker container by running
+```sh
+bash ./start_container.sh <dataset dir>
+```
+This will prompt a shell in the container environment. You will need to provide a dataset directory to ./run_container.sh with the format specified in section [Preparing the dataset](###preparing-the-dataset). If you do not currently have the dataset, please provide an empty directory to be mounted to the container and populated from within the container in the following sections.
+
+Make sure you are inside of a the docker container by observing the command prompt:
+>>(bert_pytorchh) user@xxxxxxxxxxx:
+
+
+### Preparing the Dataset
+
+We use Wikipedia and BookCorpus as our pretraining dataset. The downloader are included under the "source" direcotry. The datasets are then further sharded and converted into hdf5 format. To download the dataset, run the following command:
+```sh
+ bash /workspace/bert/data/create_datasets_from_start.sh 
+ ```
+This will use Wikiextractor and BookCorpus to download raw text, clean and format the text, and finally shard and convert them into hdf5 format. The download can take up to 1 day, and after downloading you sould see two folders created under /workspace/bert/data, _"hdf5_lower_case_1_seq_len_128_max_pred_20_masked_lm_prob_0.15_random_seed_12345_dupe_factor_5"_
+and
+_"hdf5_lower_case_1_seq_len_512_max_pred_80_masked_lm_prob_0.15_random_seed_12345_dupe_factor_5"_
+Which are used for phase 1 and phase 2 of the pre-training process.
+
+It will also download the SQuAD for fine-tuning the question-answering task.
+
+
+## Steps to Train and Profile
+Note that in this benchmark we have chosen to use the default hyper-parameters of the model, as specified in  /workspace/bert/scripts/run_pretraining.sh
+
+### Running End to End Training
+
+Once you are in the docker container, you should already be inside a conda
+environment, you can run nvidia-smi to confirm your compute resource and CUDA
+version.
+
+To start benchmarking:
+```bash
+cd /workspace/bert/
+```
+
+Edit the arguments in the scripts i.e. whether to use mixed precision, number of GPUs, bach size, if you want to run things that is different from the 1 GPU configuration.
+
+for pre-training
+```bash
+vim tbd_scripts/run_pretraining.sh
+```
+For fine-tuning, you will need to prepare a checkpoint file that is loadable by the model definition (i.e. config file and torch.NN.Module class), or one of the pretrained weights generated by run_pretraining.sh. You can find pre-trained bert model from https://github.com/google-research/bert, which are stored under TensorFlow format, and you could use tbd_scripts/convert_tf_ckpt_to_torch.py to convert the pretrained TenforFlow weights to PyTorch. 
+
+After you have generated the pretrained weights, you can store then under /scratch/bert_uncased.pt and invoke the following command.
+```bash
+vim tbd_scripts/run_squad.sh
+```
+
+then do
+```bash
+bash tbd_scripts/run_pretraining.sh 
+```
+or
+```bash
+bash tbd_scripts/run_squad.sh
+```
+to start the end to end training for pre-training or down-stream question answering, respectively.
+
+
+### Measuring Throughput
+To measure the throughput acroess different batch sizes for both pre-training and fine-tuning, run:
+```bash
+CUDA_VISIBLE_DEVICES=<GPU device IDs>  bash /workspace/bert/tbd_scripts/measure_throughput_pretrain.sh [start_iteration] [stop_iteration]
+```
+or
+```bash
+CUDA_VISIBLE_DEVICES=<GPU device IDs>  bash /workspace/bert/tbd_scripts/measure_throughput_squad.sh [start_iteration] [stop_iteration]
+```
+To measure the throughput of pre-training and fine-tuning for differnt batch sizes, respectively. 
+
+### Profiling
+
+Fine-tuning usually takes 2-4 epochs to complete and is quite short, therefore, we only provide the profiling script for pre-training. 
+
+There are two profiling modes (profilers) for this section, nvprof and ncu (nvidia Nsight System)
+
+#### nvprof
+nvprof is used to measure the compute utilization during the benchmark. To do so, the profiler generates the execution timeline of the benchmark, and users can use nvvp to extract the desired information.
+For instructions on how to derive compute utilization from nvvp timelines, please refer to thie [link](https://github.com/UofT-EcoSystem/DNN-Training-Suite#visual-profiler)
+To profile with nvprof, run:
+```bash
+CUDA_VISIBLE_DEVICES=<GPU device IDs>  bash /workspace/bert/tbd_scripts/measure_compute_util_pretrain.sh nvprof [start_iteration] [stop_iteration]
+```
+Where [start_iteration] (e.g. 1000) is the iteration to start recording profiling information and [stop_iteration] (e.g. 2000) is the iteration to finish profiling.
+The output of these the profiling steps are the NVPP timelines, which records kernel launch and memory transfer information during training. All NVVP files are stored under "pretrain_profiled_data_nvprof", each experiment should output a file size of several hundred MBs.
+
+#### ncu
+ncu is used to measure the various core utilization during the benchmark. Currently, we measure 4 different types of cores, FMA, FP16, TensorCores, and SFU. These values are collected by the profiler through repeated executions of the CUDA kernels.
+This script generates a csv file for each batch size, which records the different hardware performance metrics per each kernel invocation. These files are stored under ./pretrain_profiled_data_ncu, and are several MBs large. The final result is post-processed by a script at /app/source/coreutil.py, which aggregates all collected performance counter information and reports the average core utilization values throughout the profiled period.
+ 
+ncu is very slow, so please set [start_iteration] and [stop_iteration] to very small vales, between 1 and 10 (It is safe to do so since kernels are repeated for precise measurement).
+
+To profile with ncu, first copy the file from [nsight log parser](/Core-Utilization-Analyzer), then run:
+```bash
+CUDA_VISIBLE_DEVICES=<list of GPU device IDs>  bash /workspace/bert/tbd_scripts/measure_compute_util_pretrain.sh ncu [start_iteration] [stop_iteration]
+# after the command is finished, each batch size choice generates a corresponding csv file, which can be parsed as
+python coreutil.py pretrain_profiled_data_ncu/batch_[X].csv
+```
+
+
+
