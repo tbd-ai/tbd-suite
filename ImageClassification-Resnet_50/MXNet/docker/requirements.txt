@@ -1,4 +1,4 @@
 mxnet-cu101
 numpy
 numba
-opencv-python==4.0.0.21
+opencv-python==4.2.0.32
