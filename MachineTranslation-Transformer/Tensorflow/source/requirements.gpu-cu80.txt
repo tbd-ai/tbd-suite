@@ -1,4 +1,4 @@
 numba
-tensorflow-gpu==2.4.0
+tensorflow-gpu==2.5.2
 sympy
 bz2file
