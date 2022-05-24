@@ -1,4 +1,4 @@
-tensorflow-gpu==2.4.0
+tensorflow-gpu==2.6.4
 jupyter
 matplotlib
 pillow
