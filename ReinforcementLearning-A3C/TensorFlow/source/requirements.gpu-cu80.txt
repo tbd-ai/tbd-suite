@@ -1,5 +1,5 @@
 numba
-tensorflow-gpu==2.4.0
+tensorflow-gpu==2.7.2
 tensorboard==1.0.0a6
 tensorflow.tensorboard
 gym
